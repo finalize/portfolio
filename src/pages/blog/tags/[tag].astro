@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Prompt from '../../../components/Prompt.astro';
+import { collectTags, formatDate, getPosts } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return collectTags(posts).map(({ tag }) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts.filter((post) => post.data.tags.includes(tag)),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tag}`} description={`${tag} に関する記事の一覧。`}>
+  <Prompt cmd={`grep -rl "#${tag}" blog/`} />
+  <div class="output">
+    <h1 class="comment">#{tag} の記事（{posts.length}件）</h1>
+    <ul class="filelist">
+      {
+        posts.map((post) => (
+          <li class="filerow">
+            <time class="filerow__meta" datetime={post.data.pubDate.toISOString()}>
+              {formatDate(post.data.pubDate)}
+            </time>
+            <div>
+              <a class="filerow__name" href={`/blog/${post.id}/`}>{post.data.title}</a>
+              <span class="filerow__desc">{post.data.description}</span>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="tiny"><a href="/blog/">← cd ../</a></p>
+  </div>
+</BaseLayout>

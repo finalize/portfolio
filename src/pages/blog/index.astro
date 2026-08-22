@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prompt from '../../components/Prompt.astro';
+import { collectTags, formatDate, getPosts } from '../../lib/content';
+
+const posts = await getPosts();
+const tags = collectTags(posts);
+---
+
+<BaseLayout
+  title="Blog"
+  description="開発中に調べたこと・作ったものについて書いた記事の一覧。"
+>
+  <Prompt cmd="ls -t blog/" />
+  <div class="output">
+    <h1 class="comment">Blog</h1>
+    {
+      posts.length === 0 ? (
+        <p class="muted">まだ記事がありません。</p>
+      ) : (
+        <ul class="filelist">
+          {posts.map((post) => (
+            <li class="filerow">
+              <time class="filerow__meta" datetime={post.data.pubDate.toISOString()}>
+                {formatDate(post.data.pubDate)}
+              </time>
+              <div>
+                <a class="filerow__name" href={`/blog/${post.id}/`}>{post.data.title}</a>
+                <span class="filerow__desc">{post.data.description}</span>
+                {post.data.tags.length > 0 && (
+                  <ul class="tags">
+                    {post.data.tags.map((tag) => (
+                      <li>
+                        <a class="tag" href={`/blog/tags/${tag}/`}>{tag}</a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+
+  {
+    tags.length > 0 && (
+      <Fragment>
+        <Prompt cmd="ls blog/tags/" />
+        <div class="output">
+          <ul class="tags">
+            {tags.map(({ tag, count }) => (
+              <li>
+                <a class="tag" href={`/blog/tags/${tag}/`}>{tag}</a>
+                <span class="muted tiny">({count})</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Fragment>
+    )
+  }
+
+  <p class="tiny muted">
+    更新は <a href="/rss.xml">RSS</a> で購読できます。
+  </p>
+</BaseLayout>

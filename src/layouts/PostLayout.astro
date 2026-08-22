@@ -1,0 +1,41 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Prompt from '../components/Prompt.astro';
+import { formatDate, type Post } from '../lib/content';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, tags, draft } = post.data;
+---
+
+<BaseLayout title={title} description={description} type="article" publishedAt={pubDate}>
+  <Prompt cmd={`cat blog/${post.id}.md`} />
+  <div class="output">
+    <article class="article">
+      <header class="post-header">
+        <h1>{title}</h1>
+        <p class="post-meta">
+          <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+          {updatedDate && <span>updated: {formatDate(updatedDate)}</span>}
+          {draft && <span class="post-meta__draft">draft</span>}
+        </p>
+        {
+          tags.length > 0 && (
+            <ul class="tags">
+              {tags.map((tag) => (
+                <li>
+                  <a class="tag" href={`/blog/tags/${tag}/`}>{tag}</a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+      <slot />
+    </article>
+    <p class="tiny"><a href="/blog/">← cd ../</a></p>
+  </div>
+</BaseLayout>

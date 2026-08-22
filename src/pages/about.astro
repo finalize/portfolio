@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Prompt from '../components/Prompt.astro';
+import { SITE } from '../consts';
+---
+
+<BaseLayout
+  title="About"
+  description={`${SITE.displayName}（${SITE.role}）のプロフィール。`}
+>
+  <Prompt cmd="cat about.md" />
+  <div class="output">
+    {/* TODO: 経歴・興味・実績を本人の内容に差し替える */}
+    <article class="article">
+      <h1 class="comment">About</h1>
+      <p>{SITE.displayName} と申します。{SITE.role} として、Web とモバイルのプロダクトを個人で作っています。</p>
+
+      <h2>いまやっていること</h2>
+      <ul>
+        <li>Cloudflare Workers（Hono / D1 / R2 / Durable Objects）でのバックエンド開発</li>
+        <li>React / React Native (Expo) でのフロントエンド開発</li>
+        <li>思いついたものを小さく作って公開するまでを一人で回すこと</li>
+      </ul>
+
+      <h2>よく使うもの</h2>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>領域</th>
+              <th>道具</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>言語</td>
+              <td>TypeScript / SQL</td>
+            </tr>
+            <tr>
+              <td>フロント</td>
+              <td>React, Expo (React Native), Astro, Vite</td>
+            </tr>
+            <tr>
+              <td>バックエンド</td>
+              <td>Hono, tRPC, Drizzle ORM, Zod</td>
+            </tr>
+            <tr>
+              <td>インフラ</td>
+              <td>Cloudflare Workers / D1 / R2 / KV</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>これまで</h2>
+      <ul>
+        <li>2026 — TODO: 経歴を書く</li>
+        <li>2025 — TODO: 経歴を書く</li>
+      </ul>
+
+      <p>
+        仕事のご相談・ご連絡は <a href="/contact/">contact/</a> からどうぞ。
+      </p>
+    </article>
+  </div>
+</BaseLayout>

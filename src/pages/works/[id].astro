@@ -1,0 +1,60 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prompt from '../../components/Prompt.astro';
+import { getWorks } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const works = await getWorks();
+  return works.map((work) => ({
+    params: { id: work.id },
+    props: { work },
+  }));
+}
+
+const { work } = Astro.props;
+const { Content } = await render(work);
+const { title, summary, stack, repo, url, year } = work.data;
+---
+
+<BaseLayout title={title} description={summary} type="article">
+  <Prompt cmd={`cat works/${work.id}.md`} />
+  <div class="output">
+    <article class="article">
+      <header class="post-header">
+        <h1>{title}</h1>
+        <p class="post-meta"><span>{year}</span><span>{summary}</span></p>
+      </header>
+
+      <dl class="kv">
+        {
+          stack.length > 0 && (
+            <Fragment>
+              <dt>stack</dt>
+              <dd>{stack.join(' / ')}</dd>
+            </Fragment>
+          )
+        }
+        {
+          url && (
+            <Fragment>
+              <dt>site</dt>
+              <dd><a href={url}>{url}</a></dd>
+            </Fragment>
+          )
+        }
+        {
+          repo && (
+            <Fragment>
+              <dt>repo</dt>
+              <dd><a href={repo}>{repo}</a></dd>
+            </Fragment>
+          )
+        }
+      </dl>
+
+      <Content />
+    </article>
+    <p class="tiny"><a href="/works/">← cd ../</a></p>
+  </div>
+</BaseLayout>

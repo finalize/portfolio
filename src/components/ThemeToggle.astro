@@ -1,0 +1,28 @@
+---
+---
+
+<button class="theme-toggle" type="button" data-theme-toggle aria-label="配色（ダーク / ライト）を切り替える">
+  <span data-theme-label>dark</span>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const label = document.querySelector<HTMLElement>('[data-theme-label]');
+
+  const sync = () => {
+    if (label) label.textContent = document.documentElement.dataset.theme ?? 'dark';
+  };
+
+  sync();
+
+  button?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* プライベートモード等で localStorage が使えない場合は無視 */
+    }
+    sync();
+  });
+</script>

@@ -1,0 +1,18 @@
+---
+import { SITE } from '../consts';
+
+interface Props {
+  /** プロンプトの後ろに表示するコマンド */
+  cmd: string;
+  /** カレントディレクトリ表示（省略時は ~/<user>） */
+  path?: string;
+}
+
+const { cmd, path = `~/${SITE.user}` } = Astro.props;
+---
+
+<div class="prompt">
+  <span class="prompt__path" aria-hidden="true">{path}</span>
+  <span class="prompt__sigil" aria-hidden="true">$</span>
+  <span class="prompt__cmd">{cmd}</span>
+</div>

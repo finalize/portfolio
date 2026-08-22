@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prompt from '../../components/Prompt.astro';
+import { getWorks } from '../../lib/content';
+
+const works = await getWorks();
+---
+
+<BaseLayout
+  title="Works"
+  description="これまでに作ったプロダクト・ツールの一覧。"
+>
+  <Prompt cmd="ls -l works/" />
+  <div class="output">
+    <h1 class="comment">Works</h1>
+    {
+      works.length === 0 ? (
+        <p class="muted">まだ何もありません。</p>
+      ) : (
+        <ul class="filelist">
+          {works.map((work) => (
+            <li class="filerow">
+              <span class="filerow__meta">{work.data.year}</span>
+              <div>
+                <a class="filerow__name" href={`/works/${work.id}/`}>{work.data.title}</a>
+                <span class="filerow__desc">{work.data.summary}</span>
+                {work.data.stack.length > 0 && (
+                  <ul class="stack">
+                    {work.data.stack.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</BaseLayout>

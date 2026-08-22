@@ -1,0 +1,657 @@
+/* =========================================================
+   design tokens
+   ========================================================= */
+:root {
+  color-scheme: dark;
+
+  --bg: #0b0e0f;
+  --bg-elev: #131819;
+  --bg-inset: #0f1415;
+  --fg: #cfd8d3;
+  --fg-dim: #8b9a93;
+  --accent: #7ee787;   /* プロンプト記号・強調 */
+  --accent-2: #79c0ff; /* コマンド・ディレクトリ */
+  --accent-3: #ffa657; /* タグ・日付 */
+  --danger: #ff7b72;
+  --border: #223028;
+  --selection: #1f3d2a;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Noto Sans Mono", "BIZ UDGothic", "Hiragino Sans", "Yu Gothic", monospace;
+
+  --radius: 10px;
+  --measure: 44em;
+  --shell-width: 900px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #eef1ee;
+  --bg-elev: #fbfcfb;
+  --bg-inset: #f1f4f1;
+  --fg: #1b2220;
+  --fg-dim: #5b6a63;
+  --accent: #1a7f37;
+  --accent-2: #0550ae;
+  --accent-3: #953800;
+  --danger: #b62324;
+  --border: #d6dfd9;
+  --selection: #cdeed7;
+}
+
+/* =========================================================
+   base
+   ========================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: clamp(0.75rem, 3vw, 2.5rem) clamp(0.5rem, 3vw, 2rem);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: clamp(0.875rem, 0.82rem + 0.25vw, 0.95rem);
+  line-height: 1.75;
+  font-feature-settings: "palt" 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-break: strict;
+}
+
+::selection {
+  background: var(--selection);
+  color: var(--fg);
+}
+
+a {
+  color: var(--accent-2);
+  text-decoration: none;
+  text-underline-offset: 0.25em;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.6;
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 0.5rem 1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+  z-index: 10;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* =========================================================
+   terminal window
+   ========================================================= */
+.shell {
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  min-height: calc(100dvh - 2 * clamp(0.75rem, 3vw, 2.5rem));
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset,
+    0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="light"] .shell {
+  box-shadow: 0 1px 2px rgba(27, 34, 32, 0.06), 0 12px 28px rgba(27, 34, 32, 0.08);
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg-inset);
+  border-bottom: 1px solid var(--border);
+}
+
+.titlebar__dots {
+  display: flex;
+  gap: 0.4rem;
+  flex: none;
+}
+
+.titlebar__dots span {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.titlebar__dots span:nth-child(1) { background: #ff5f57; }
+.titlebar__dots span:nth-child(2) { background: #febc2e; }
+.titlebar__dots span:nth-child(3) { background: #28c840; }
+
+.titlebar__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  color: var(--fg-dim);
+  font-size: 0.8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.screen {
+  padding: clamp(1rem, 3.5vw, 2rem) clamp(0.9rem, 3.5vw, 2rem)
+    clamp(1.25rem, 4vw, 2.25rem);
+}
+
+/* =========================================================
+   prompt line
+   ========================================================= */
+.prompt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.6ch;
+  font-weight: 400;
+  margin: 0;
+}
+
+.prompt__path {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.prompt__sigil {
+  color: var(--fg-dim);
+}
+
+.prompt__cmd {
+  color: var(--accent-2);
+}
+
+/* コマンド出力のブロック */
+.output {
+  margin: 0.35rem 0 2rem;
+}
+
+.output:last-child {
+  margin-bottom: 0;
+}
+
+.output > * + * {
+  margin-top: 0.75rem;
+}
+
+/* シェルコメント風の見出し */
+.comment {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.comment::before {
+  content: "# ";
+  color: var(--fg-dim);
+  font-weight: 400;
+}
+
+.muted {
+  color: var(--fg-dim);
+}
+
+.tiny {
+  font-size: 0.85em;
+}
+
+/* =========================================================
+   nav (ls の出力)
+   ========================================================= */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 2.5ch;
+  margin-top: 0.35rem;
+}
+
+.nav a {
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.nav a[aria-current="page"] {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* =========================================================
+   file listing
+   ========================================================= */
+.filelist {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.filerow {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0 2ch;
+  align-items: baseline;
+}
+
+.filerow__meta {
+  color: var(--accent-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.filerow__name {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.filerow__name:hover {
+  color: var(--accent);
+}
+
+.filerow__desc {
+  color: var(--fg-dim);
+  font-size: 0.92em;
+}
+
+@media (max-width: 34rem) {
+  .filerow {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+}
+
+/* タグ */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75ch;
+}
+
+.tag {
+  color: var(--accent-3);
+  font-size: 0.9em;
+}
+
+.tag::before {
+  content: "#";
+  opacity: 0.7;
+}
+
+/* スタック（言語・技術）バッジ */
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.stack li {
+  padding: 0 0.6ch;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--fg-dim);
+  font-size: 0.85em;
+}
+
+/* 定義リスト（contact / works のメタ情報） */
+.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 2ch;
+}
+
+.kv dt {
+  color: var(--fg-dim);
+}
+
+.kv dd {
+  margin: 0;
+}
+
+@media (max-width: 34rem) {
+  .kv {
+    grid-template-columns: 1fr;
+    gap: 0 0;
+  }
+
+  .kv dd {
+    margin-bottom: 0.6rem;
+  }
+}
+
+/* =========================================================
+   article (記事本文は可読性優先)
+   ========================================================= */
+.article {
+  max-width: var(--measure);
+  line-height: 1.95;
+}
+
+.article > * + * {
+  margin-top: 1.4em;
+}
+
+.article h2,
+.article h3,
+.article h4 {
+  line-height: 1.6;
+  margin-top: 2.6em;
+}
+
+.article h2 {
+  font-size: 1.15em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border);
+}
+
+.article h2::before,
+.article h3::before {
+  color: var(--fg-dim);
+  font-weight: 400;
+}
+
+.article h2::before { content: "## "; }
+.article h3::before { content: "### "; }
+
+.article a {
+  text-decoration: underline;
+}
+
+.article ul,
+.article ol {
+  padding-left: 1.5em;
+}
+
+.article ul {
+  list-style: disc;
+}
+
+.article ol {
+  list-style: decimal;
+}
+
+.article li + li {
+  margin-top: 0.4em;
+}
+
+.article li::marker {
+  color: var(--fg-dim);
+}
+
+.article blockquote {
+  margin: 1.4em 0;
+  padding: 0.2em 0 0.2em 1.2em;
+  border-left: 2px solid var(--accent);
+  color: var(--fg-dim);
+}
+
+.article code {
+  padding: 0.1em 0.4ch;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+
+.article pre {
+  margin: 1.6em 0;
+  padding: 1rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  line-height: 1.7;
+}
+
+.article pre code {
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 0.92em;
+}
+
+.article hr {
+  margin: 2.4em 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.article table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+
+.article :is(th, td) {
+  padding: 0.4em 0.8em;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.article th {
+  background: var(--bg-inset);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* =========================================================
+   footer
+   ========================================================= */
+.footer {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 2ch;
+  margin-top: 0.6rem;
+  color: var(--fg-dim);
+  font-size: 0.85em;
+}
+
+.footer__links a {
+  color: var(--fg-dim);
+}
+
+.footer__links a:hover {
+  color: var(--accent);
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.05em;
+  translate: 0 0.15em;
+  background: var(--accent);
+  animation: blink 1.15s steps(1, end) infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* テーマ切替ボタン */
+.theme-toggle {
+  flex: none;
+  padding: 0 0.6ch;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--fg-dim);
+  font: inherit;
+  font-size: 0.8em;
+  line-height: 1.7;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .cursor {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   page-specific pieces
+   ========================================================= */
+p {
+  margin: 0;
+}
+
+.hero {
+  font-size: clamp(1.35rem, 1.1rem + 1.2vw, 1.9rem);
+  line-height: 1.4;
+}
+
+.hero__role {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.5em;
+  font-weight: 400;
+}
+
+.filerow__desc {
+  display: block;
+  margin-top: 0.1rem;
+}
+
+.filerow .stack {
+  margin-top: 0.4rem;
+}
+
+.filerow .tags {
+  margin-top: 0.3rem;
+}
+
+.post-header {
+  padding-bottom: 1.2em;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-header h1 {
+  font-size: clamp(1.2rem, 1.05rem + 0.7vw, 1.55rem);
+  line-height: 1.55;
+}
+
+.post-header .tags {
+  margin-top: 0.5rem;
+}
+
+.post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5ch;
+  margin-top: 0.6rem;
+  color: var(--fg-dim);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.post-meta__draft {
+  color: var(--accent-3);
+}
+
+.article .post-header + * {
+  margin-top: 2em;
+}
+
+/* ヘッダー（ls の出力）と本文のあいだ */
+.screen > header {
+  margin-bottom: 1.9rem;
+}
+
+/* 記事内でも、UI 用のリスト（タグ・スタック）は markdown のリスト装飾を受けない */
+.article :is(.tags, .stack, .nav) {
+  padding-left: 0;
+  list-style: none;
+}
+
+.article :is(.tags, .stack, .nav) li + li {
+  margin-top: 0;
+}
+
+.article :is(.tags, .stack, .nav) a {
+  text-decoration: none;
+}
+
+.article :is(.tags, .stack, .nav) a:hover {
+  text-decoration: underline;
+}

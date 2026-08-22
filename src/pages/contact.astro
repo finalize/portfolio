@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Prompt from '../components/Prompt.astro';
+import { SOCIALS } from '../consts';
+---
+
+<BaseLayout
+  title="Contact"
+  description="お問い合わせ先（メール・SNS）。"
+>
+  <Prompt cmd="cat contact.txt" />
+  <div class="output">
+    <h1 class="comment">Contact</h1>
+    <p class="muted">
+      お仕事のご相談・ご質問はメールか SNS のDMへどうぞ。だいたい数日以内に返信します。
+    </p>
+    <dl class="kv">
+      {
+        SOCIALS.map((social) => (
+          <Fragment>
+            <dt>{social.label}</dt>
+            <dd>
+              <a href={social.href} rel={social.label === 'mail' ? undefined : 'me'}>
+                {social.value}
+              </a>
+            </dd>
+          </Fragment>
+        ))
+      }
+    </dl>
+  </div>
+</BaseLayout>
