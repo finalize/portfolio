@@ -8,7 +8,8 @@ GitHub のリポジトリ名は `portfolio`、Worker 名とローカルのディ
 | 目的 | コマンド |
 |---|---|
 | 開発サーバー | `pnpm dev`（http://localhost:4321） |
-| 型チェック | `pnpm check` |
+| 型チェック＋配色チェック | `pnpm check` |
+| 配色チェックのみ | `pnpm run check:contrast` |
 | ビルド | `pnpm build` |
 | ビルド結果の確認 | `pnpm preview` |
 | デプロイ | `pnpm run ship` |
@@ -51,7 +52,10 @@ wrangler.jsonc          静的アセット配信の設定（Worker コードは�
 
 - ターミナル風。等幅フォント、ダーク基調。プロンプト行を描画するのは `src/components/Prompt.astro` だけ。
 - **Web フォントは追加しない。** 外部リクエストゼロを維持する。
-- 配色は `src/styles/global.css` の CSS 変数で管理し、本文・リンクのコントラスト比は 4.5:1 以上を保つ。
+- 配色は `src/styles/global.css` の CSS 変数で管理する。本文・リンクのコントラスト比 4.5:1 以上は
+  `scripts/check-contrast.mjs`（自作の [contrast-kit](https://www.npmjs.com/package/contrast-kit) を使用）が
+  `pnpm check` の中で検査し、CI で強制される。トークンを変えたら必ずこれを通すこと。
+  実際に重なる組み合わせだけを検査対象にしている（本文の背景は `--bg` ではなく `--bg-elev`）。
 - 記事本文だけは可読性優先（`max-width: 44em` / `line-height: 1.95`）。
 
 ## 自動化されていること

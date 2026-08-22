@@ -21,6 +21,9 @@ importers:
       '@astrojs/check':
         specifier: ^0.9.10
         version: 0.9.10(prettier@3.9.6)(typescript@6.0.3)
+      contrast-kit:
+        specifier: ^0.1.0
+        version: 0.1.0
       sharp:
         specifier: ^0.35.3
         version: 0.35.3(@types/node@24.13.3)
@@ -1286,6 +1289,9 @@ packages:
   common-ancestor-path@2.0.0:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
     engines: {node: '>= 18'}
+
+  contrast-kit@0.1.0:
+    resolution: {integrity: sha512-tKZ/IJaKJDqedmR2dO5XvvJitx51NGLi0v13yo7dGyMqOOggnmjJSzG+EWYmXjYfWtJhfWelVIcorxuYZDjILw==}
 
   cookie-es@1.2.3:
     resolution: {integrity: sha512-lXVyvUvrNXblMqzIRrxHb57UUVmqsSWlxqt3XIjCkUP0wDAf6uicO6KMbEgYrMNtEvWgWHwe42CKxPu9MYAnWw==}
@@ -3280,6 +3286,8 @@ snapshots:
   commander@14.0.3: {}
 
   common-ancestor-path@2.0.0: {}
+
+  contrast-kit@0.1.0: {}
 
   cookie-es@1.2.3: {}
 
