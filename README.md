@@ -70,3 +70,38 @@ pnpm run ship   # astro build && wrangler deploy
 
 `public/favicon.svg` を編集して `pnpm run images` を実行すると、favicon.png / apple-touch-icon.png / og.png が再生成される。
 OGP の文言は `scripts/generate-images.mjs` の `OG_TEXT` にある。
+
+## 自動化
+
+| いつ | 何が起きるか | ファイル |
+|---|---|---|
+| PR / push | 型チェック（`pnpm check`）とビルド | `.github/workflows/ci.yml` |
+| main への push | CI 通過後に Cloudflare へ自動デプロイ | 同上（`deploy` ジョブ） |
+| 毎週月曜 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ、メジャーはレビュー待ちで残る | `.github/dependabot.yml` / `dependabot-auto-merge.yml` |
+| 毎週月曜 09:00 JST | Claude が点検（脆弱性・メジャー更新・リンク切れ）し、対応が必要なら issue を1件作る | `claude-maintenance.yml` |
+| PR 作成時 | Claude がレビューし、指摘をインラインコメントで残す | `claude-review.yml` |
+| `@claude` コメント | Claude が調査・修正してブランチに push する | `claude.yml` |
+
+main は「check & build の通過」を必須にしてあるので、自動処理経由でも壊れたコードは入らない（管理者は必要なら直接 push できる）。
+
+### 必要なシークレット
+
+| 名前 | 用途 | 取り方 |
+|---|---|---|
+| `CLAUDE_CODE_OAUTH_TOKEN` | Actions 内の Claude の認証（サブスク） | `claude setup-token` |
+| `CLOUDFLARE_API_TOKEN` | 自動デプロイ | ダッシュボード → API トークン → Custom の「Edit Cloudflare Workers」テンプレート |
+| `CLOUDFLARE_ACCOUNT_ID` | 自動デプロイ | Cloudflare ダッシュボードの Workers 画面に表示される Account ID |
+
+```bash
+gh secret set CLAUDE_CODE_OAUTH_TOKEN
+gh secret set CLOUDFLARE_API_TOKEN
+gh secret set CLOUDFLARE_ACCOUNT_ID
+```
+
+Claude のワークフローには [Claude GitHub App](https://github.com/apps/claude) のインストールも必要。
+シークレットが無いあいだ、該当ジョブはスキップされるだけで CI は落ちない。
+
+### 注意
+
+- Dependabot が起点の実行には Actions のシークレットが渡らない（Dependabot 用の別ストアになる）ため、Dependabot の PR に Claude のレビューは走らない。直したいときは PR に `@claude CIを直して` とコメントする。
+- public リポジトリでは、60日間リポジトリに動きがないと GitHub が cron を自動停止する。止まったら Actions の画面から再有効化する。
