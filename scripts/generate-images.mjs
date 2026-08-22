@@ -53,7 +53,7 @@ const favicon = await readFile(path.join(publicDir, 'favicon.svg'));
 await sharp(favicon, { density: 384 }).resize(32, 32).png().toFile(path.join(publicDir, 'favicon.png'));
 await sharp(favicon, { density: 384 }).resize(180, 180).png().toFile(path.join(publicDir, 'apple-touch-icon.png'));
 
-await writeFile(path.join(publicDir, 'og.svg'), ogSvg);
+await writeFile(path.join(root, 'scripts', 'og.svg'), ogSvg); // 確認用（公開はしない）
 await sharp(Buffer.from(ogSvg)).png().toFile(path.join(publicDir, 'og.png'));
 
 console.log('generated: favicon.png / apple-touch-icon.png / og.png');
