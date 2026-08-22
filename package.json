@@ -1,5 +1,6 @@
 {
   "name": "shogo-site",
+  "private": true,
   "type": "module",
   "version": "0.0.1",
   "packageManager": "pnpm@10.30.1",
