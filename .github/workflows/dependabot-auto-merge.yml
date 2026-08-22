@@ -1,0 +1,32 @@
+name: Dependabot auto-merge
+
+# Dependabot の PR のうち minor / patch のものを、CI 通過後に自動マージする。
+# メジャー更新は update-type が semver-major になるためここを通らず、レビュー待ちで残る。
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dependabot のメタデータを取得
+        id: meta
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 自動マージを有効にする
+        # update-type は「PR に含まれる中で最も大きい semver 変更」なので、
+        # まとめPRにメジャーが混ざっていればここで弾かれる。
+        if: |
+          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          steps.meta.outputs.update-type == 'version-update:semver-minor'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge --auto --squash "$PR_URL"

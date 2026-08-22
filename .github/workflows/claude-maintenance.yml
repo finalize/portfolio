@@ -1,0 +1,87 @@
+name: Claude Maintenance
+
+# 毎週月曜 09:00 JST に Claude が点検し、対応が必要なら issue を1件だけ立てる。
+# ファイルの変更・push は行わない（報告のみ）。
+on:
+  schedule:
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: claude-maintenance
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CLAUDE_CODE_OAUTH_TOKEN が未設定のため点検をスキップしました"
+          fi
+
+  maintenance:
+    needs: guard
+    if: needs.guard.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: |
+            --max-turns 40
+            --allowedTools "Bash,Read,Glob,Grep"
+          prompt: |
+            このリポジトリは Astro の静的サイト（Cloudflare Workers 配信）です。週次の保守点検を行ってください。
+            依存関係はインストール済みです。
+
+            ## 調べること
+
+            1. 脆弱性: `pnpm audit --prod` と `pnpm audit` を実行する。
+               本番の依存（`--prod`）に出たものは重要度が高い。ビルドツールだけの問題かどうかを区別して書くこと。
+            2. メジャー更新: `pnpm outdated` を実行する。
+               minor / patch は Dependabot が自動で PR を出すので**報告しない**。メジャー更新だけを対象にする。
+               対象があれば、そのパッケージのリリースノートを WebFetch で読み、破壊的変更の有無と移行の手間を要約する。
+            3. ビルド: `pnpm build` が警告なく通ることを確認する。
+            4. リンク: `dist/` の HTML から href を集め、
+               - 内部リンク（`/` 始まり）は対応する HTML が `dist/` に存在するか確認する
+               - 外部リンク（http/https）は `curl -sS -o /dev/null -w '%{http_code}' -L --max-time 15` で確認し、404 / 410 だけを報告する（タイムアウトや 403 は報告しない）
+               - `src/consts.ts` のプレースホルダ（example.com / your_handle）は既知なので報告不要
+            5. `public/_headers` と `astro.config.mjs` の `site` が、実際に配信されている URL と食い違っていないか確認する。
+
+            ## 報告の仕方
+
+            対応が必要な項目が1つでもある場合のみ、`gh issue create` で issue を**1件だけ**作る。
+            - タイトル: `週次点検: <実行日 YYYY-MM-DD>`
+            - 本文: 見つかった項目ごとに「何が」「なぜ問題か」「推奨する対応」を箇条書きで書く。緊急度の高い順に並べる。
+            - 先に `gh issue list --search "週次点検" --state open` を確認し、未対応の同種 issue が既にあるなら新規作成せず、その issue にコメントを追記する。
+            - 何も問題がなければ issue は作らず、実行ログに「問題なし」とだけ出力して終了する。
+
+            ## 制約
+
+            - ファイルの変更・コミット・push は一切しないこと。この実行は報告だけを行う。
+            - `src/consts.ts` のメールアドレスや SNS ハンドルはプレースホルダのままにする。実在の個人情報を埋めないこと。
+            - 推測で書かない。実際にコマンドを実行して得られた出力だけを根拠にする。

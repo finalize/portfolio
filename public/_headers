@@ -1,0 +1,21 @@
+# Cloudflare Workers の静的アセットが返すレスポンスヘッダー。
+# 構文: パターン行 + インデントした「名前: 値」。ルールは最大100件。
+# https://developers.cloudflare.com/workers/static-assets/headers/
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Cross-Origin-Opener-Policy: same-origin
+
+# Astro が出力するアセットはファイル名にハッシュが入るので、恒久キャッシュにしてよい
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/favicon.svg
+  Cache-Control: public, max-age=604800
+
+/og.png
+  Cache-Control: public, max-age=604800
