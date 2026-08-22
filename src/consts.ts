@@ -25,12 +25,11 @@ export type SocialLink = {
   href: string;
 };
 
-/** TODO: メールアドレス・X のアカウントを実際のものに差し替える */
 export const SOCIALS: SocialLink[] = [
   {
     label: 'mail',
-    value: 'you@example.com',
-    href: 'mailto:you@example.com',
+    value: 'shgysd.work@gmail.com',
+    href: 'mailto:shgysd.work@gmail.com',
   },
   {
     label: 'github',
@@ -39,8 +38,8 @@ export const SOCIALS: SocialLink[] = [
   },
   {
     label: 'x',
-    value: 'x.com/your_handle',
-    href: 'https://x.com/your_handle',
+    value: 'x.com/finalize',
+    href: 'https://x.com/finalize',
   },
 ];
 
