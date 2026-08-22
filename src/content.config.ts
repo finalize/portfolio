@@ -31,4 +31,19 @@ const works = defineCollection({
   }),
 });
 
-export const collections = { blog, works };
+const log = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/log' }),
+  schema: z.object({
+    /** ファイル名（YYYY-MM-DD）と同じ日付。JST 基準 */
+    date: z.coerce.date(),
+    /** ok = 点検のみ異常なし / changed = 直した / reported = 直さず issue にした */
+    status: z.enum(['ok', 'changed', 'reported']),
+    /** 一覧に1行で出る要約 */
+    summary: z.string(),
+    /** 関連する PR / issue の番号 */
+    pr: z.number().optional(),
+    issue: z.number().optional(),
+  }),
+});
+
+export const collections = { blog, works, log };

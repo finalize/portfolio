@@ -8,7 +8,8 @@ src/
 ├─ content.config.ts    blog / works コレクションの定義（zod スキーマ）
 ├─ content/
 │  ├─ blog/*.md         記事
-│  └─ works/*.md        制作物
+│  ├─ works/*.md        制作物
+│  └─ log/*.md          整備ログ（Claude が毎日1件追記。/log/ に表示）
 ├─ layouts/             BaseLayout（全ページ共通） / PostLayout（記事）
 ├─ components/          Prompt（`~/shogo $ ...` の行） / ThemeToggle
 ├─ styles/global.css    デザイントークンと全スタイル
@@ -77,7 +78,7 @@ OGP の文言は `scripts/generate-images.mjs` の `OG_TEXT` にある。
 |---|---|---|
 | PR / push | 型チェック（`pnpm check`）とビルド | `.github/workflows/ci.yml` |
 | main への push | CI 通過後に Cloudflare へ自動デプロイ | 同上（`deploy` ジョブ） |
-| 毎日 09:00 JST | Claude が点検し、**直せるものは PR にして自動マージ**。直せないものは issue にする | `claude-maintenance.yml` |
+| 毎日 09:00 JST | Claude が点検し、**直せるものは PR にして自動マージ**。直せないものは issue にする。変更の有無にかかわらず `/log/` に整備ログを1件残す | `claude-maintenance.yml` |
 | 毎日 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ、メジャーはレビュー待ちで残る | `.github/dependabot.yml` / `dependabot-auto-merge.yml` |
 | 毎日 10:00 JST | main を再デプロイ | `ci.yml`（`schedule`） |
 | PR 作成時 | Claude がレビューしてインラインコメント（bot の PR は対象外） | `claude-review.yml` |

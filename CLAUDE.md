@@ -34,7 +34,7 @@ wrangler.jsonc          静的アセット配信の設定（Worker コードは�
 
 ## コンテンツを足すときの決まり
 
-- 記事は `src/content/blog/<slug>.md`、制作物は `src/content/works/<slug>.md`。ファイル名がそのまま URL になる。
+- 記事は `src/content/blog/<slug>.md`、制作物は `src/content/works/<slug>.md`、整備ログは `src/content/log/<YYYY-MM-DD>.md`。ファイル名がそのまま URL になる。
 - フロントマターは `src/content.config.ts` の zod スキーマで検証される。必須項目が欠けるとビルドが落ちる。
 - **YAML の値に `: `（コロン＋空白）が含まれる場合は必ずダブルクォートで囲む。** 例: `description: "draft: true を付けた記事は…"`。囲まないとパースエラーになる。
 - **タグは ASCII 小文字にする。** `/blog/tags/<tag>/` として URL に出るため。
@@ -60,7 +60,7 @@ wrangler.jsonc          静的アセット配信の設定（Worker コードは�
 |---|---|
 | PR / push | CI（`pnpm check` + `pnpm build`） |
 | main への push | CI 通過後に Cloudflare へ自動デプロイ |
-| 毎日 09:00 JST | Claude が点検し、直せるものは PR にして自動マージする。直せないものは issue にする |
+| 毎日 09:00 JST | Claude が点検し、直せるものは PR にして自動マージする。直せないものは issue にする。**変更の有無にかかわらず `src/content/log/<日付>.md` に整備ログを残す**（`/log/` に表示される） |
 | 毎日 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ |
 | 毎日 10:00 JST | main を再デプロイ（自動マージは push イベントを発火させないための取りこぼし対策） |
 | PR 作成時 | Claude がレビュー（bot が作った PR は対象外） |
@@ -77,6 +77,7 @@ wrangler.jsonc          静的アセット配信の設定（Worker コードは�
 - 記事本文（`src/content/blog/*.md`）の変更は、誤字・リンク切れ・技術的な誤りの修正に限る。主張や語り口は書き換えない。
 - デザイン変更は `src/styles/global.css` の既存 CSS 変数の範囲内で行う。新しい色・フォント・Web フォントを増やさない。
 - 依存を増やさない。必要だと判断したら、直さずに issue で提案する。
-- 1回の実行で扱うテーマは1つに絞り、差分は必要最小限にする。直すものが無ければ何も変更しない。
+- 1回の実行で扱うテーマは1つに絞り、差分は必要最小限にする。直すものが無ければコードは変更しない（整備ログだけを残す）。
+- 整備ログは1日1ファイル。既存のログファイルは編集しない。実行していない点検を「実施した」と書かない。
 - `astro.config.mjs` の `site` を変えるときは `public/robots.txt` の Sitemap 行も一緒に変える。RSS・sitemap・canonical の絶対 URL がこの値に依存している。
 - `public/_headers` に CSP は入れていない。テーマ初期化と 404 ページがインラインスクリプトを使っており、`script-src 'self'` では動かなくなるため。入れるならインラインスクリプトの扱いを先に解決すること。

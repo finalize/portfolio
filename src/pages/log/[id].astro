@@ -1,0 +1,37 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Prompt from '../../components/Prompt.astro';
+import { formatDate, getLogEntries } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getLogEntries();
+  return entries.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { date, status, summary, pr, issue } = entry.data;
+---
+
+<BaseLayout title={`${formatDate(date)} の整備ログ`} description={summary} type="article" publishedAt={date}>
+  <Prompt cmd={`cat log/${entry.id}.md`} />
+  <div class="output">
+    <article class="article">
+      <header class="post-header">
+        <h1>{summary}</h1>
+        <p class="post-meta">
+          <time datetime={date.toISOString()}>{formatDate(date)}</time>
+          <span class={`logrow__status logrow__status--${status}`}>[{status}]</span>
+          {pr && <a href={`https://github.com/finalize/portfolio/pull/${pr}`}>PR #{pr}</a>}
+          {issue && <a href={`https://github.com/finalize/portfolio/issues/${issue}`}>issue #{issue}</a>}
+        </p>
+      </header>
+      <Content />
+    </article>
+    <p class="tiny"><a href="/log/">← cd ../</a></p>
+  </div>
+</BaseLayout>

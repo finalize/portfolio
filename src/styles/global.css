@@ -655,3 +655,80 @@ p {
 .article :is(.tags, .stack, .nav) a:hover {
   text-decoration: underline;
 }
+
+/* =========================================================
+   整備ログ
+   ========================================================= */
+.logmonth + .logmonth {
+  margin-top: 1.75rem;
+}
+
+.loglist {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.logrow {
+  display: grid;
+  grid-template-columns: max-content max-content 1fr;
+  gap: 0 2ch;
+  align-items: baseline;
+}
+
+.logrow__date {
+  color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.logrow__status {
+  white-space: nowrap;
+  font-size: 0.9em;
+}
+
+.logrow__status--ok {
+  color: var(--fg-dim);
+}
+
+.logrow__status--changed {
+  color: var(--accent);
+}
+
+.logrow__status--reported {
+  color: var(--accent-3);
+}
+
+.logrow__summary {
+  color: var(--fg);
+}
+
+.logrow__summary:hover {
+  color: var(--accent);
+}
+
+.logrow__refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5ch;
+  margin-top: 0.1rem;
+  font-size: 0.85em;
+}
+
+.logrow__refs a {
+  color: var(--fg-dim);
+}
+
+.logrow__refs a:hover {
+  color: var(--accent-2);
+}
+
+@media (max-width: 34rem) {
+  .logrow {
+    grid-template-columns: max-content max-content;
+    gap: 0.1rem 1.5ch;
+  }
+
+  .logrow > div {
+    grid-column: 1 / -1;
+  }
+}

@@ -5,6 +5,7 @@ const includeDrafts = import.meta.env.DEV;
 
 export type Post = CollectionEntry<'blog'>;
 export type Work = CollectionEntry<'works'>;
+export type LogEntry = CollectionEntry<'log'>;
 
 /** 公開記事を新しい順で取得 */
 export async function getPosts(): Promise<Post[]> {
@@ -36,4 +37,20 @@ export function collectTags(posts: Post[]): { tag: string; count: number }[] {
   return [...counts]
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}
+
+/** 整備ログを新しい順で取得 */
+export async function getLogEntries(): Promise<LogEntry[]> {
+  const entries = await getCollection('log');
+  return entries.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+}
+
+/** 一覧表示用に年月（YYYY-MM）でグループ化する */
+export function groupByMonth(entries: LogEntry[]): { month: string; entries: LogEntry[] }[] {
+  const groups = new Map<string, LogEntry[]>();
+  for (const entry of entries) {
+    const month = formatDate(entry.data.date).slice(0, 7);
+    groups.set(month, [...(groups.get(month) ?? []), entry]);
+  }
+  return [...groups].map(([month, list]) => ({ month, entries: list }));
 }
