@@ -77,12 +77,40 @@ OGP の文言は `scripts/generate-images.mjs` の `OG_TEXT` にある。
 |---|---|---|
 | PR / push | 型チェック（`pnpm check`）とビルド | `.github/workflows/ci.yml` |
 | main への push | CI 通過後に Cloudflare へ自動デプロイ | 同上（`deploy` ジョブ） |
-| 毎週月曜 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ、メジャーはレビュー待ちで残る | `.github/dependabot.yml` / `dependabot-auto-merge.yml` |
-| 毎週月曜 09:00 JST | Claude が点検（脆弱性・メジャー更新・リンク切れ）し、対応が必要なら issue を1件作る | `claude-maintenance.yml` |
-| PR 作成時 | Claude がレビューし、指摘をインラインコメントで残す | `claude-review.yml` |
+| 毎日 09:00 JST | Claude が点検し、**直せるものは PR にして自動マージ**。直せないものは issue にする | `claude-maintenance.yml` |
+| 毎日 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ、メジャーはレビュー待ちで残る | `.github/dependabot.yml` / `dependabot-auto-merge.yml` |
+| 毎日 10:00 JST | main を再デプロイ | `ci.yml`（`schedule`） |
+| PR 作成時 | Claude がレビューしてインラインコメント（bot の PR は対象外） | `claude-review.yml` |
 | `@claude` コメント | Claude が調査・修正してブランチに push する | `claude.yml` |
 
 main は「check & build の通過」を必須にしてあるので、自動処理経由でも壊れたコードは入らない（管理者は必要なら直接 push できる）。
+
+### 自動改修の範囲と歯止め
+
+Claude が自分の判断で直してよいのは、依存のメジャー更新対応・壊れたリンクや設定の不整合・アクセシビリティ / SEO の明確な欠落・文面やデザインの修正。制約の全文は `CLAUDE.md` の「自動実行での約束事」にある。要点だけ挙げると:
+
+- 変更前に `pnpm check` と `pnpm build` が通ることを Claude 自身が確認し、CI でも再検証してから自動マージされる
+- `.github/` と `CLAUDE.md` を触った PR は**自動マージされない**（Claude が自分の制約を書き換えて通せないようにするため）
+- 連絡先のプレースホルダは埋めない。経歴などの事実を創作しない。記事の主張や語り口は書き換えない
+- 新しい依存・色・フォントは足さない。1回の実行で扱うテーマは1つ、差分は最小限
+
+### 気に入らない変更を取り消す
+
+自動改修は squash マージなので、1つのコミットが1回分の改修に対応する。
+
+```bash
+git revert <コミット>
+git push origin main        # CI が走って自動で再デプロイされる
+```
+
+コードは戻さず配信だけ即座に戻したいときは、Cloudflare 側のバージョンをロールバックする。
+
+```bash
+pnpm exec wrangler rollback              # 直前のバージョンへ
+pnpm exec wrangler versions list         # 戻し先を選びたいとき
+```
+
+自律実行を一時的に止めたいときは、Actions の画面で `Claude Maintenance` ワークフローを Disable する。
 
 ### 必要なシークレット
 

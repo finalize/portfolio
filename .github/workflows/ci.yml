@@ -1,14 +1,22 @@
 name: CI
 
-# PR と main への push で型チェック・ビルドを回し、main では続けて Cloudflare へデプロイする。
+# PR と push で型チェック・ビルドを回し、main では続けて Cloudflare へデプロイする。
 on:
   push:
-    branches: [main]
+    # claude/** も対象にするのは、Claude が作ったブランチのコミットに対して
+    # 必須チェック（check & build）を成立させるため。
+    # PR を GITHUB_TOKEN で作ると pull_request イベントが発火しない仕様のため、
+    # push 側で同じ SHA のチェックを走らせておく。
+    branches: [main, "claude/**"]
   pull_request:
   workflow_dispatch:
+  schedule:
+    # 毎日 10:00 JST。自動マージ（GITHUB_TOKEN 経由）は main への push イベントを
+    # 発火させないため、Dependabot / Claude がマージした内容を取りこぼさないよう毎日 main を再デプロイする。
+    - cron: "0 1 * * *"
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 permissions:
@@ -35,11 +43,16 @@ jobs:
   deploy:
     name: deploy to Cloudflare
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: main
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:

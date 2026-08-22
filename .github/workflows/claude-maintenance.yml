@@ -1,10 +1,10 @@
 name: Claude Maintenance
 
-# 毎週月曜 09:00 JST に Claude が点検し、対応が必要なら issue を1件だけ立てる。
-# ファイルの変更・push は行わない（報告のみ）。
+# 毎日 09:00 JST に Claude がサイトを点検し、自分で直せるものは PR にして自動マージする。
+# .github/ と CLAUDE.md（自動化の設定そのもの）を触った場合だけは自動マージせず、人間のレビューに回す。
 on:
   schedule:
-    - cron: "0 0 * * 1"
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -32,9 +32,10 @@ jobs:
     needs: guard
     if: needs.guard.outputs.ready == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
       issues: write
       id-token: write
     steps:
@@ -52,36 +53,63 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: |
-            --max-turns 40
-            --allowedTools "Bash,Read,Glob,Grep"
+            --max-turns 60
+            --allowedTools "Bash,Read,Glob,Grep,Edit,Write,WebFetch"
           prompt: |
-            このリポジトリは Astro の静的サイト（Cloudflare Workers 配信）です。週次の保守点検を行ってください。
-            依存関係はインストール済みです。
+            このリポジトリは Astro の静的サイト（Cloudflare Workers 配信）です。
+            毎日の保守を自律的に行ってください。依存関係はインストール済みです。
+            今日の日付は `TZ=Asia/Tokyo date +%F` で取得すること（ランナーは UTC）。
 
-            ## 調べること
+            ## 1. 点検
 
-            1. 脆弱性: `pnpm audit --prod` と `pnpm audit` を実行する。
-               本番の依存（`--prod`）に出たものは重要度が高い。ビルドツールだけの問題かどうかを区別して書くこと。
-            2. メジャー更新: `pnpm outdated` を実行する。
-               minor / patch は Dependabot が自動で PR を出すので**報告しない**。メジャー更新だけを対象にする。
-               対象があれば、そのパッケージのリリースノートを WebFetch で読み、破壊的変更の有無と移行の手間を要約する。
-            3. ビルド: `pnpm build` が警告なく通ることを確認する。
-            4. リンク: `dist/` の HTML から href を集め、
-               - 内部リンク（`/` 始まり）は対応する HTML が `dist/` に存在するか確認する
-               - 外部リンク（http/https）は `curl -sS -o /dev/null -w '%{http_code}' -L --max-time 15` で確認し、404 / 410 だけを報告する（タイムアウトや 403 は報告しない）
-               - `src/consts.ts` のプレースホルダ（example.com / your_handle）は既知なので報告不要
-            5. `public/_headers` と `astro.config.mjs` の `site` が、実際に配信されている URL と食い違っていないか確認する。
+            - `pnpm audit --prod` と `pnpm audit`（本番依存に出たものは重要度が高い）
+            - `pnpm outdated`。minor / patch は Dependabot が自動化しているので**メジャー更新だけ**を対象にする
+            - `pnpm build` が警告なく通るか
+            - `dist/` の HTML からリンクを集め、内部リンク（`/` 始まり）が実在するか、
+              外部リンクが 404 / 410 でないかを確認する（タイムアウトや 403 は報告しない）
+            - `astro.config.mjs` の `site` と `public/robots.txt` の Sitemap 行が、実際の公開 URL と一致しているか
+            - アクセシビリティ / SEO の明確な欠落: 画像の alt 抜け、見出し階層の飛び、meta description の欠落、
+              コントラスト比 4.5:1 未満の配色
 
-            ## 報告の仕方
+            ## 2. 直す
 
-            対応が必要な項目が1つでもある場合のみ、`gh issue create` で issue を**1件だけ**作る。
-            - タイトル: `週次点検: <実行日 YYYY-MM-DD>`（日付は JST。ランナーは UTC なので `TZ=Asia/Tokyo date +%F` で取得すること）
-            - 本文: 見つかった項目ごとに「何が」「なぜ問題か」「推奨する対応」を箇条書きで書く。緊急度の高い順に並べる。
-            - 先に `gh issue list --search "週次点検" --state open` を確認し、未対応の同種 issue が既にあるなら新規作成せず、その issue にコメントを追記する。
-            - 何も問題がなければ issue は作らず、実行ログに「問題なし」とだけ出力して終了する。
+            見つかった問題のうち、**自分で正しく直せると確信できるものだけ**を直す。
+            1回の実行で扱うテーマは1つに絞り、差分は必要最小限にすること。
+            直すものが無ければ何も変更しない（無理に仕事を作らない）。
 
-            ## 制約
+            ## 3. 検証
 
-            - ファイルの変更・コミット・push は一切しないこと。この実行は報告だけを行う。
-            - `src/consts.ts` のメールアドレスや SNS ハンドルはプレースホルダのままにする。実在の個人情報を埋めないこと。
-            - 推測で書かない。実際にコマンドを実行して得られた出力だけを根拠にする。
+            `pnpm check` と `pnpm build` を実行し、両方通ることを確認する。通らない変更は破棄する。
+            見た目に影響する変更をした場合は、ビルド後の HTML を読んで構造が壊れていないことも確認する。
+
+            ## 4. PR を出す
+
+            `claude/daily-<YYYY-MM-DD>` ブランチを切って commit・push し、`gh pr create` で PR を出す。
+            PR 本文には「何を」「なぜ」「どう検証したか」を書く。
+            そのあと `gh pr merge --auto --squash <PR番号>` で自動マージを有効にする。
+
+            ただし **`.github/` 配下または `CLAUDE.md` を変更した場合は `gh pr merge` を実行しないこと。**
+            自動化の設定そのものは人間のレビューを通す。PR 本文にその旨を明記して残す。
+
+            ## 5. 直せないものは issue にする
+
+            確信を持って直せない項目（メジャー更新の破壊的変更、判断が必要な仕様変更など）が残ったら、
+            `gh issue create` で issue を**1件だけ**作る。タイトルは `日次点検: <YYYY-MM-DD>`（JST）。
+            先に `gh issue list --search "点検" --state open` を確認し、同種の open issue があれば
+            新規作成せずその issue にコメントを追記する。
+
+            問題も変更も無ければ、PR も issue も作らず「問題なし」とログに出して終了する。
+
+            ## 絶対に守ること
+
+            - `src/consts.ts` のメールアドレスと SNS ハンドルはプレースホルダのまま残す。
+              git の設定や履歴から実在の連絡先を拾って埋めない。
+            - **本人に関する事実を創作しない。** 経歴・実績・所属・肩書きを推測で書き足さない。
+              `src/pages/about.astro` の TODO 行は TODO のまま残す。
+            - 記事本文（`src/content/blog/*.md`）の変更は、誤字・リンク切れ・技術的な誤りの修正に限る。
+              主張や語り口は書き換えない。
+            - デザイン変更は `src/styles/global.css` の既存 CSS 変数の範囲内で行う。
+              新しい色・フォント・Web フォントを増やさない。
+            - 依存を増やさない。必要だと判断したら、直さずに issue で提案する。
+            - `git push --force` と main への直接 push は禁止。
+            - 推測で報告しない。実際にコマンドを実行して得られた出力だけを根拠にする。

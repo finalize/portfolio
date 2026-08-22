@@ -11,8 +11,10 @@ concurrency:
 
 jobs:
   guard:
-    # Dependabot が起点の実行には Actions のシークレットが渡らないので、そもそも動かさない。
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    # bot が作った PR では動かさない。
+    # Dependabot 起点の実行には Actions のシークレットが渡らず、
+    # Claude 自身の PR は自動マージが先に走ってレビューが間に合わないため。
+    if: "!endsWith(github.event.pull_request.user.login, '[bot]')"
     runs-on: ubuntu-latest
     outputs:
       ready: ${{ steps.check.outputs.ready }}
