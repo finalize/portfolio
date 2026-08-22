@@ -10,26 +10,24 @@ import Prompt from '../components/Prompt.astro';
       <span aria-hidden="true">zsh: no such file or directory: </span>
       <span data-404-path>/</span>
     </h1>
-    <p class="muted">
-      URL が変わったか、もともと存在しないページです。
-    </p>
+    <p class="muted">URL が変わったか、もともと存在しないページです。</p>
     <ul class="nav">
       <li><a href="/">~/</a></li>
       <li><a href="/blog/">blog/</a></li>
       <li><a href="/works/">works/</a></li>
     </ul>
   </div>
+
+  <script is:inline>
+    const target = document.querySelector('[data-404-path]');
+    if (target) target.textContent = location.pathname;
+  </script>
+
+  <style>
+    .error-line {
+      color: var(--danger);
+      font-weight: 400;
+      overflow-wrap: anywhere;
+    }
+  </style>
 </BaseLayout>
-
-<script is:inline>
-  const target = document.querySelector('[data-404-path]');
-  if (target) target.textContent = location.pathname;
-</script>
-
-<style>
-  .error-line {
-    color: var(--danger);
-    font-weight: 400;
-    overflow-wrap: anywhere;
-  }
-</style>
