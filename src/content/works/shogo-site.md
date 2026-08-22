@@ -5,7 +5,7 @@ stack:
   - Astro
   - TypeScript
   - Cloudflare Workers
-repo: https://github.com/finalize/shogo-site
+repo: https://github.com/finalize/portfolio
 year: 2026
 order: 100
 ---

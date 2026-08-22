@@ -1,4 +1,4 @@
-# shogo-site
+# portfolio
 
 個人サイト（プロフィール / 制作物 / ブログ）。Astro の静的ビルドを Cloudflare Workers の静的アセットとして配信する。
 
