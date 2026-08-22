@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shogo-site.workers.dev/sitemap-index.xml
+Sitemap: https://shogo-site.shgysd.workers.dev/sitemap-index.xml

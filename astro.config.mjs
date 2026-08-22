@@ -4,7 +4,8 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: 独自ドメイン取得後にここを差し替える（RSS / sitemap / OGP の絶対URLがこれに依存）
-  site: 'https://shogo-site.workers.dev',
+  // 独自ドメイン取得後はここを差し替える（RSS / sitemap / OGP の絶対URLがこれに依存）
+  // 変更時は public/robots.txt の Sitemap 行も一緒に直すこと
+  site: 'https://shogo-site.shgysd.workers.dev',
   integrations: [sitemap()],
 });
