@@ -24,8 +24,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "contrast-kit": "^0.1.0",
+    "contrast-kit": "^0.3.0",
     "sharp": "^0.35.3",
+    "termpic": "^0.2.0",
     "typescript": "^6.0.3",
     "wrangler": "^4.125.0"
   }
