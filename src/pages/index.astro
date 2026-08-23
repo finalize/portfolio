@@ -12,7 +12,13 @@ const works = (await getWorks()).slice(0, 3);
 <BaseLayout title={SITE.name}>
   <Prompt cmd="whoami" />
   <section class="output whoami">
-    <TermPic src="src/assets/avatar.jpeg" alt="愛犬のトイプードル。マス目に落として描いたもの" cols={26} />
+    <TermPic
+      src="src/assets/avatar.jpeg"
+      alt="愛犬のトイプードル。マス目に落として描いたもの"
+      mode="quadrant"
+      cols={40}
+      width={132}
+    />
     <div>
       <h1 class="hero">
         {SITE.displayName}
