@@ -1,7 +1,10 @@
 ---
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Prompt from '../../components/Prompt.astro';
+import TermPic from '../../components/TermPic.astro';
 import { getWorks } from '../../lib/content';
 
 export async function getStaticPaths() {
@@ -15,6 +18,12 @@ export async function getStaticPaths() {
 const { work } = Astro.props;
 const { Content } = await render(work);
 const { title, summary, stack, repo, url, year } = work.data;
+
+// src/assets/works/<id>.png があれば自動でサムネイルにする。
+// 元画像は公開されず、ビルド時にマス目へ落とした結果だけが HTML に入る。
+// 用意するには node scripts/capture-works.mjs
+const thumb = `src/assets/works/${work.id}.png`;
+const hasThumb = existsSync(path.resolve(process.cwd(), thumb));
 ---
 
 <BaseLayout title={title} description={summary} type="article">
@@ -25,6 +34,20 @@ const { title, summary, stack, repo, url, year } = work.data;
         <h1>{title}</h1>
         <p class="post-meta"><span>{year}</span><span>{summary}</span></p>
       </header>
+
+      {
+        hasThumb && (
+          <div class="work-thumb">
+            <TermPic
+              src={thumb}
+              alt={`${title} の画面をマス目に落として描いたもの`}
+              mode="quadrant"
+              cols={64}
+              width={420}
+            />
+          </div>
+        )
+      }
 
       <dl class="kv">
         {

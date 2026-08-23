@@ -67,6 +67,8 @@ const fontSize = width / grid.cols / 0.6;
 
 <div
   class="termpic-frame"
-  style={as === 'svg' ? `width:${width}px` : `--termpic-font-size:${fontSize.toFixed(3)}px`}
+  style={as === 'svg'
+    ? `width:${width}px`
+    : `--termpic-font-size:${fontSize.toFixed(3)}px;--termpic-cols:${grid.cols}`}
   set:html={markup}
 />
