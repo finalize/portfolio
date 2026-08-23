@@ -22,6 +22,13 @@
   --radius: 10px;
   --measure: 44em;
   --shell-width: 900px;
+  /*
+     狭い画面で termpic を縮めるときに、幅から引く余白の合計。
+     内訳は左右それぞれ body の padding + .shell の枠 + .screen の padding + .termpic-frame の内側で、
+     375px 幅だと合計 68px。clamp() の効き方が幅で変わるので、少し多めに取って取りこぼしを防ぐ
+     （.shell が overflow: hidden なので、はみ出すとエラーにならず黙って端が切れる）。
+  */
+  --termpic-gutter: 5.5rem;
 }
 
 :root[data-theme="light"] {
@@ -452,7 +459,8 @@ video {
   font-size: 0.92em;
 }
 
-.article pre {
+/* コードブロック用の見た目。termpic の出力は pre だが中身は絵なので外す */
+.article pre:not(.termpic) {
   margin: 1.6em 0;
   padding: 1rem;
   background: var(--bg-inset);
@@ -743,16 +751,30 @@ p {
   line-height: 1;
   letter-spacing: 0;
   white-space: pre;
-  /* 表示幅からコンポーネント側が逆算して入れる */
-  font-size: var(--termpic-font-size, 0.5rem);
+  /*
+     基本はコンポーネントが表示幅から逆算した値。
+     ただし画面が狭いとそのままでは溢れるので、実際に置ける幅からも上限をかける。
+     1文字の字送りは 0.6em なので、幅 W に収める文字サイズは W / 桁数 / 0.6。
+     --termpic-gutter は端末ウィンドウの内側までの余白の合計（375px 幅で実測）。
+  */
+  font-size: min(
+    var(--termpic-font-size, 0.5rem),
+    calc((100vw - var(--termpic-gutter)) / var(--termpic-cols, 40) / 0.6)
+  );
 }
 
 .termpic-frame {
   width: max-content;
+  max-width: 100%;
   padding: 0.4rem;
   background: var(--bg-inset);
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+
+/* works 詳細のサムネイル */
+.work-thumb {
+  margin: 0 0 1.5rem;
 }
 
 .whoami {

@@ -14,6 +14,7 @@ GitHub のリポジトリ名は `portfolio`、Worker 名とローカルのディ
 | ビルド結果の確認 | `pnpm preview` |
 | デプロイ | `pnpm run ship` |
 | favicon / OGP 画像の再生成 | `pnpm run images` |
+| works のサムネイル元画像の再取得 | `node scripts/capture-works.mjs [<id>]` |
 
 - `deploy` という script 名は pnpm の組み込みコマンドと衝突して実行されないため、デプロイは `ship`。
 - 通常のデプロイは main への push で GitHub Actions が行う。`pnpm run ship` は手元から流したいとき用。
@@ -54,6 +55,12 @@ wrangler.jsonc          静的アセット配信の設定（Worker コードは�
 - **Web フォントは追加しない。** 外部リクエストゼロを維持する。
 - 画像は `<TermPic>` でマス目に落として置く。ターミナル風の見た目に合わせるため、素の画像は貼らない。
   `cellAspect` の既定は 1.66（`.termpic` が `line-height: 1` のときの実測値）。
+- **マス目に落とす元画像は「大きく・平らで・色の差がはっきりした構図」を選ぶ。** 細かい文字は全部つぶれるので、
+  ページ全体のスクリーンショットを流し込むと、ただの灰色の面になる。実測で確かめてから採用すること。
+- works 詳細のサムネイルは `src/assets/works/<id>.png` があれば自動で付く。用意するのは `node scripts/capture-works.mjs`。
+  一覧（`ls -l` 風）には付けない。
+- `.termpic` は `pre` なので、記事本文のコードブロック用スタイル（`.article pre:not(.termpic)`）から除外してある。
+  この `:not()` を外すと `line-height: 1.7` が効いて、マスとマスのあいだに横縞が出る。
 - 配色は `src/styles/global.css` の CSS 変数で管理する。本文・リンクのコントラスト比 4.5:1 以上は
   `scripts/check-contrast.mjs`（自作の [contrast-kit](https://www.npmjs.com/package/contrast-kit) を使用）が
   `pnpm check` の中で検査し、CI で強制される。トークンを変えたら必ずこれを通すこと。
