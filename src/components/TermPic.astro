@@ -24,6 +24,11 @@ interface Props {
   cellAspect?: number;
   /** svg のときの1マスの幅（px） */
   cellSize?: number;
+  /**
+   * 表示幅（px）。html のときはここからフォントサイズを逆算するので、
+   * マス数を増やしても表示の大きさは変わらない。
+   */
+  width?: number;
 }
 
 const {
@@ -35,6 +40,7 @@ const {
   as = 'html',
   cellAspect = 1.66,
   cellSize = 6,
+  width = 130,
 } = Astro.props;
 
 // ビルド時に Node で動くので、そのまま画像を読んで変換できる。
@@ -54,6 +60,13 @@ const bitmap = {
 const palette = colors > 0 ? extractPalette(bitmap, colors) : undefined;
 const grid = convert(bitmap, { mode, cols, cellAspect, ...(palette ? { palette } : {}) });
 const markup = as === 'svg' ? toSvg(grid, { cellSize, alt }) : toHtml(grid, { alt });
+
+// 等幅フォントの字送りは概ね 0.6em。表示幅から逆算する
+const fontSize = width / grid.cols / 0.6;
 ---
 
-<div class="termpic-frame" set:html={markup} />
+<div
+  class="termpic-frame"
+  style={as === 'svg' ? `width:${width}px` : `--termpic-font-size:${fontSize.toFixed(3)}px`}
+  set:html={markup}
+/>

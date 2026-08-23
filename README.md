@@ -49,10 +49,16 @@ draft: false
 画像は `<TermPic>` コンポーネントでマス目に落として置く。ビルド時に [termpic](https://www.npmjs.com/package/termpic) で変換するので、**元画像は公開されず**、HTML に入るのは変換結果だけ。
 
 ```astro
-<TermPic src="src/assets/avatar.jpeg" alt="説明" cols={26} />
+<TermPic src="src/assets/avatar.jpeg" alt="説明" mode="quadrant" cols={40} width={132} />
 ```
 
-出力は文字なので、拡大しても選択してもテキストのまま。26マスのアバターで 16.6KB（gzip 後は 1KB 強）。
+出力は文字なので、拡大しても選択してもテキストのまま。`width` は表示幅（px）で、そこからフォントサイズを逆算するため、**マス数を増やしても表示の大きさは変わらない**。
+
+| モード | 1マスの分割 | 40マスのアバターの実測 |
+|---|---|---|
+| `halfblock` | 1x2 | 粗いが軽い |
+| `quadrant` | 2x2 | 横の解像度が倍。38.9KB → gzip 3.6KB |
+| `braille` | 2x4 | 最も細かいが、写真では点の粒が目立つ |
 
 ## デプロイ（Cloudflare Workers）
 

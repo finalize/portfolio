@@ -743,10 +743,12 @@ p {
   line-height: 1;
   letter-spacing: 0;
   white-space: pre;
-  font-size: 0.5rem;
+  /* 表示幅からコンポーネント側が逆算して入れる */
+  font-size: var(--termpic-font-size, 0.5rem);
 }
 
 .termpic-frame {
+  width: max-content;
   padding: 0.4rem;
   background: var(--bg-inset);
   border: 1px solid var(--border);
