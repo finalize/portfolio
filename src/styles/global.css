@@ -732,3 +732,45 @@ p {
     grid-column: 1 / -1;
   }
 }
+
+/* =========================================================
+   termpic の出力（画像をマス目に落としたもの）
+   ========================================================= */
+.termpic {
+  margin: 0;
+  font-family: var(--font-mono);
+  /* マスの縦横比を 1.66 として変換しているので、行間を詰めないと縦に伸びる */
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: pre;
+  font-size: 0.5rem;
+}
+
+.termpic-frame {
+  padding: 0.4rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.whoami {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0 1.5rem;
+  align-items: start;
+}
+
+.whoami > * + * {
+  margin-top: 0;
+}
+
+.whoami > div > * + * {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 34rem) {
+  .whoami {
+    grid-template-columns: 1fr;
+    gap: 1rem 0;
+  }
+}

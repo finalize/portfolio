@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Prompt from '../components/Prompt.astro';
+import TermPic from '../components/TermPic.astro';
 import { SITE, SOCIALS } from '../consts';
 import { formatDate, getPosts, getWorks } from '../lib/content';
 
@@ -10,14 +11,17 @@ const works = (await getWorks()).slice(0, 3);
 
 <BaseLayout title={SITE.name}>
   <Prompt cmd="whoami" />
-  <section class="output">
-    <h1 class="hero">
-      {SITE.displayName}
-      <span class="hero__role muted">— {SITE.role}</span>
-    </h1>
+  <section class="output whoami">
+    <TermPic src="src/assets/avatar.jpeg" alt="愛犬のトイプードル。マス目に落として描いたもの" cols={26} />
+    <div>
+      <h1 class="hero">
+        {SITE.displayName}
+        <span class="hero__role muted">— {SITE.role}</span>
+      </h1>
     {/* TODO: 自己紹介を本人の言葉に差し替える */}
     <p>Cloudflare Workers と TypeScript で、個人開発のプロダクトを作っています。最近は Hono + D1 + Expo の組み合わせが多めです。</p>
-    <p class="muted">このサイトには、作ったものと開発中に調べたことを置いています。</p>
+      <p class="muted">このサイトには、作ったものと開発中に調べたことを置いています。</p>
+    </div>
   </section>
 
   <Prompt cmd="ls works/" />

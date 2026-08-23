@@ -1,0 +1,59 @@
+---
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
+import { convert, extractPalette, toHtml, toSvg } from 'termpic';
+import type { Mode } from 'termpic';
+
+interface Props {
+  /** プロジェクトルートからの画像のパス */
+  src: string;
+  /** 読み上げ用の説明。画像なので必須 */
+  alt: string;
+  /** 横のマス数 */
+  cols?: number;
+  mode?: Mode;
+  /** 画像から抽出する色数。0 なら元の色のまま */
+  colors?: number;
+  /** html は文字として出す（文字サイズに追従する）。svg は画像として出す */
+  as?: 'html' | 'svg';
+  /**
+   * 1マスの縦横比。html で出すときは描画フォントの実測値に合わせる必要がある。
+   * global.css の .termpic は line-height: 1 なので 1.66。
+   */
+  cellAspect?: number;
+  /** svg のときの1マスの幅（px） */
+  cellSize?: number;
+}
+
+const {
+  src,
+  alt,
+  cols = 32,
+  mode = 'halfblock',
+  colors = 16,
+  as = 'html',
+  cellAspect = 1.66,
+  cellSize = 6,
+} = Astro.props;
+
+// ビルド時に Node で動くので、そのまま画像を読んで変換できる。
+// 元画像は出力に含まれず、公開されるのはマス目に落とした結果だけ。
+const source = await sharp(await readFile(path.resolve(process.cwd(), src)))
+  .resize({ width: cols * 24, withoutEnlargement: false })
+  .ensureAlpha()
+  .raw()
+  .toBuffer({ resolveWithObject: true });
+
+const bitmap = {
+  width: source.info.width,
+  height: source.info.height,
+  data: new Uint8ClampedArray(source.data),
+};
+
+const palette = colors > 0 ? extractPalette(bitmap, colors) : undefined;
+const grid = convert(bitmap, { mode, cols, cellAspect, ...(palette ? { palette } : {}) });
+const markup = as === 'svg' ? toSvg(grid, { cellSize, alt }) : toHtml(grid, { alt });
+---
+
+<div class="termpic-frame" set:html={markup} />

@@ -44,6 +44,16 @@ draft: false
 - タグは URL に出るので ASCII（英小文字）にしておく
 - 制作物は `src/content/works/<slug>.md`。`src/content/works/example.md` が雛形
 
+## 画像
+
+画像は `<TermPic>` コンポーネントでマス目に落として置く。ビルド時に [termpic](https://www.npmjs.com/package/termpic) で変換するので、**元画像は公開されず**、HTML に入るのは変換結果だけ。
+
+```astro
+<TermPic src="src/assets/avatar.jpeg" alt="説明" cols={26} />
+```
+
+出力は文字なので、拡大しても選択してもテキストのまま。26マスのアバターで 16.6KB（gzip 後は 1KB 強）。
+
 ## デプロイ（Cloudflare Workers）
 
 初回だけログインする。

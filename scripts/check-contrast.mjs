@@ -7,7 +7,7 @@
  * 基準を満たさない組み合わせが1つでもあれば終了コード 1 で落ちる。
  */
 import { readFile } from "node:fs/promises";
-import { auditPairs, extractRuleBlock, parseCssVariables } from "contrast-kit";
+import { auditPairs, extractRuleBlock, parseCssVariables, suggestAccessible } from "contrast-kit";
 
 const CSS_PATH = new URL("../src/styles/global.css", import.meta.url);
 
@@ -77,7 +77,17 @@ for (const theme of THEMES) {
     console.log(
       `    ${mark}${result.name.padEnd(28)} ${`${fg} / ${bg}`.padEnd(30)} ${ratio}  ${result.level}`,
     );
-    if (!result.passes && !advisory) failures++;
+
+    if (result.passes || advisory) continue;
+    failures++;
+
+    // 「足りない」だけでなく直し方も出す
+    const fix = suggestAccessible(result.fg, result.bg, { large: result.large });
+    console.log(
+      fix === undefined
+        ? `        → 明度を振り切っても届きません。色相から見直す必要があります`
+        : `        → ${fg} を ${fix.color} にすれば ${fix.ratio.toFixed(2)}:1`,
+    );
   }
   console.log("");
 }

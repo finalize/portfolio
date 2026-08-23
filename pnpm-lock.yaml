@@ -22,11 +22,14 @@ importers:
         specifier: ^0.9.10
         version: 0.9.10(prettier@3.9.6)(typescript@6.0.3)
       contrast-kit:
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.3.0
+        version: 0.3.0
       sharp:
         specifier: ^0.35.3
         version: 0.35.3(@types/node@24.13.3)
+      termpic:
+        specifier: ^0.2.0
+        version: 0.2.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1290,8 +1293,11 @@ packages:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
     engines: {node: '>= 18'}
 
-  contrast-kit@0.1.0:
-    resolution: {integrity: sha512-tKZ/IJaKJDqedmR2dO5XvvJitx51NGLi0v13yo7dGyMqOOggnmjJSzG+EWYmXjYfWtJhfWelVIcorxuYZDjILw==}
+  contrast-kit@0.2.0:
+    resolution: {integrity: sha512-UDn4W6UV3iQgThPvyvUUK3yTLGdpcD7vqXvzeNPoD1Ka/ev/PUH9PzuycipDyZ2uIJ3pUTcqBKnDsKAQNH3EGQ==}
+
+  contrast-kit@0.3.0:
+    resolution: {integrity: sha512-nECkYeEoeJ9czl8iP4BQL9waaVSiB7VXAZpz01ll5eTkcdf3lY2cbikQWPgMG3gd89xzjToagxKAxMPE9P3txg==}
 
   cookie-es@1.2.3:
     resolution: {integrity: sha512-lXVyvUvrNXblMqzIRrxHb57UUVmqsSWlxqt3XIjCkUP0wDAf6uicO6KMbEgYrMNtEvWgWHwe42CKxPu9MYAnWw==}
@@ -1871,6 +1877,9 @@ packages:
     resolution: {integrity: sha512-ekx94z1rRc5LDi6oSUaeRnYhd0UOJxdtQCL2rF8xpWxD3TPAsISWOrxezqGovqS38GRZOdpDfvQe3ts6F7nsng==}
     engines: {node: '>=16'}
     hasBin: true
+
+  termpic@0.2.0:
+    resolution: {integrity: sha512-hir+iuiei06XL/vjCQVDtLsTecbNDUtGp72xvLVD647HVT3NeerEEDKD5yRy98ka7E02uJ/ilOcsrubTnSPw0g==}
 
   tiny-inflate@1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
@@ -3287,7 +3296,9 @@ snapshots:
 
   common-ancestor-path@2.0.0: {}
 
-  contrast-kit@0.1.0: {}
+  contrast-kit@0.2.0: {}
+
+  contrast-kit@0.3.0: {}
 
   cookie-es@1.2.3: {}
 
@@ -3950,6 +3961,10 @@ snapshots:
       csso: 5.0.5
       picocolors: 1.1.1
       sax: 1.6.1
+
+  termpic@0.2.0:
+    dependencies:
+      contrast-kit: 0.2.0
 
   tiny-inflate@1.0.3: {}
 
