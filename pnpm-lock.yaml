@@ -28,8 +28,8 @@ importers:
         specifier: ^0.35.3
         version: 0.35.3(@types/node@24.13.3)
       termpic:
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.1
+        version: 0.2.1
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1878,8 +1878,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  termpic@0.2.0:
-    resolution: {integrity: sha512-hir+iuiei06XL/vjCQVDtLsTecbNDUtGp72xvLVD647HVT3NeerEEDKD5yRy98ka7E02uJ/ilOcsrubTnSPw0g==}
+  termpic@0.2.1:
+    resolution: {integrity: sha512-oOR/RhDBkU3p495cFuK6DK5wUrllQ25DW/hN1zCZMiaFaKeh1qKKFvu9LtU6oLjCWK+/HCPxiDGLyggajeAKBw==}
 
   tiny-inflate@1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
@@ -3962,7 +3962,7 @@ snapshots:
       picocolors: 1.1.1
       sax: 1.6.1
 
-  termpic@0.2.0:
+  termpic@0.2.1:
     dependencies:
       contrast-kit: 0.2.0
 
