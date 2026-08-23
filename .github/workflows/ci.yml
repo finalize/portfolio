@@ -11,9 +11,10 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    # 毎日 10:00 JST。自動マージ（GITHUB_TOKEN 経由）は main への push イベントを
+    # 毎日 10:43 JST。自動マージ（GITHUB_TOKEN 経由）は main への push イベントを
     # 発火させないため、Dependabot / Claude がマージした内容を取りこぼさないよう毎日 main を再デプロイする。
-    - cron: "0 1 * * *"
+    # 毎時ちょうどは GitHub 側の負荷が高いので、中途半端な時刻にしてある。
+    - cron: "43 1 * * *"
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.event_name }}
