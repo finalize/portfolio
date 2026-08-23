@@ -64,9 +64,9 @@ wrangler.jsonc          静的アセット配信の設定（Worker コードは�
 |---|---|
 | PR / push | CI（`pnpm check` + `pnpm build`） |
 | main への push | CI 通過後に Cloudflare へ自動デプロイ |
-| 毎日 09:00 JST | Claude が点検し、直せるものは PR にして自動マージする。直せないものは issue にする。**変更の有無にかかわらず `src/content/log/<日付>.md` に整備ログを残す**（`/log/` に表示される） |
+| 毎日 09:17 JST | Claude が点検し、直せるものは PR にして自動マージする。直せないものは issue にする。**変更の有無にかかわらず `src/content/log/<日付>.md` に整備ログを残す**（`/log/` に表示される） |
 | 毎日 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ |
-| 毎日 10:00 JST | main を再デプロイ（自動マージは push イベントを発火させないための取りこぼし対策） |
+| 毎日 10:43 JST | main を再デプロイ（自動マージは push イベントを発火させないための取りこぼし対策） |
 | PR 作成時 | Claude がレビュー（bot が作った PR は対象外） |
 | `@claude` コメント | Claude が調査・修正して PR を更新する |
 

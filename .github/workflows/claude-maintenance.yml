@@ -1,10 +1,11 @@
 name: Claude Maintenance
 
-# 毎日 09:00 JST に Claude がサイトを点検し、自分で直せるものは PR にして自動マージする。
+# 毎日 09:17 JST に Claude がサイトを点検し、自分で直せるものは PR にして自動マージする。
 # .github/ と CLAUDE.md（自動化の設定そのもの）を触った場合だけは自動マージせず、人間のレビューに回す。
 on:
   schedule:
-    - cron: "0 0 * * *"
+    # 09:17 JST。毎時ちょうどは GitHub 側の負荷が高く、遅延したりジョブが落とされたりする
+    - cron: "17 0 * * *"
   workflow_dispatch:
 
 concurrency:
