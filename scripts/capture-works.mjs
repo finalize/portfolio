@@ -34,6 +34,10 @@ const SOURCES = {
   // 実際のスクリーンショットより、マス目に落としたときによく残る。
   'shogo-site': { file: 'public/og.png' },
 
+  // hidori も同じ理由で OGP 画像を使う。実物の画面は白地に細い記号なので、
+  // トップ・出欠表・その一部と3通り試して全部ただの灰色の面になった。
+  hidori: { url: 'https://hidori.shgysd.workers.dev/og.png', image: true },
+
   // プレビューに出ている変換結果そのもの。太い輪と黒の2値に近いので、
   // もう一度マス目に落としても崩れない。上の入力欄と設定欄の高さは固定なので位置も動かない。
   termpic: {
@@ -51,6 +55,13 @@ const SOURCES = {
 
 async function sourceImage(id, source) {
   if (source.file) return readFile(path.join(root, source.file));
+
+  // url が画像そのものを指しているときは、ブラウザを立てずに落とすだけでよい
+  if (source.image) {
+    const response = await fetch(source.url);
+    if (!response.ok) throw new Error(`${id}: ${source.url} が ${response.status} を返しました`);
+    return Buffer.from(await response.arrayBuffer());
+  }
 
   const shot = path.join(tmpDir, `${id}.png`);
   await run('pnpm', [
