@@ -28,8 +28,8 @@ importers:
         specifier: ^0.35.3
         version: 0.35.3(@types/node@24.13.3)
       termpic:
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.2
+        version: 0.2.2
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1293,9 +1293,6 @@ packages:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
     engines: {node: '>= 18'}
 
-  contrast-kit@0.2.0:
-    resolution: {integrity: sha512-UDn4W6UV3iQgThPvyvUUK3yTLGdpcD7vqXvzeNPoD1Ka/ev/PUH9PzuycipDyZ2uIJ3pUTcqBKnDsKAQNH3EGQ==}
-
   contrast-kit@0.3.0:
     resolution: {integrity: sha512-nECkYeEoeJ9czl8iP4BQL9waaVSiB7VXAZpz01ll5eTkcdf3lY2cbikQWPgMG3gd89xzjToagxKAxMPE9P3txg==}
 
@@ -1878,8 +1875,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  termpic@0.2.1:
-    resolution: {integrity: sha512-oOR/RhDBkU3p495cFuK6DK5wUrllQ25DW/hN1zCZMiaFaKeh1qKKFvu9LtU6oLjCWK+/HCPxiDGLyggajeAKBw==}
+  termpic@0.2.2:
+    resolution: {integrity: sha512-7COBqYjwU9Yc8r9etZ9vWeBONhg50d24cFtyDjUv/w7U0yx3DQbrqJXLjySZR+fs55++CPvBkvEE2q0slFE8/Q==}
 
   tiny-inflate@1.0.3:
     resolution: {integrity: sha512-pkY1fj1cKHb2seWDy0B16HeWyczlJA9/WW3u3c4z/NiWDsO3DOU5D7nhTLE9CF0yXv/QZFY7sEJmj24dK+Rrqw==}
@@ -3296,8 +3293,6 @@ snapshots:
 
   common-ancestor-path@2.0.0: {}
 
-  contrast-kit@0.2.0: {}
-
   contrast-kit@0.3.0: {}
 
   cookie-es@1.2.3: {}
@@ -3962,9 +3957,9 @@ snapshots:
       picocolors: 1.1.1
       sax: 1.6.1
 
-  termpic@0.2.1:
+  termpic@0.2.2:
     dependencies:
-      contrast-kit: 0.2.0
+      contrast-kit: 0.3.0
 
   tiny-inflate@1.0.3: {}
 
