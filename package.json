@@ -20,14 +20,14 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.2.6"
+    "astro": "^7.2.9"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "contrast-kit": "^0.3.0",
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.4",
     "termpic": "^0.2.2",
     "typescript": "^6.0.3",
-    "wrangler": "^4.125.0"
+    "wrangler": "^4.127.1"
   }
 }
