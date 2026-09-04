@@ -29,5 +29,10 @@
     "termpic": "^0.2.2",
     "typescript": "^6.0.3",
     "wrangler": "^4.127.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri": "^3.1.7"
+    }
   }
 }
