@@ -1,40 +1,40 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Prompt from '../../components/Prompt.astro';
 import { getWorks } from '../../lib/content';
 
 const works = await getWorks();
 ---
 
-<BaseLayout
-  title="Works"
-  description="これまでに作ったプロダクト・ツールの一覧。"
->
-  <Prompt cmd="ls -l works/" />
-  <div class="output">
-    <h1 class="comment">Works</h1>
+<BaseLayout title="Works" description="これまでに作ったプロダクト・ツールの一覧。">
+  <div class="stack-lg">
+    <div>
+      <h1 class="page-title">Works</h1>
+      <p class="page-lead">作ったプロダクトとツール。{works.length} 件。</p>
+    </div>
+
     {
       works.length === 0 ? (
         <p class="muted">まだ何もありません。</p>
       ) : (
-        <ul class="filelist">
+        <div class="results">
           {works.map((work) => (
-            <li class="filerow">
-              <span class="filerow__meta">{work.data.year}</span>
-              <div>
-                <a class="filerow__name" href={`/works/${work.id}/`}>{work.data.title}</a>
-                <span class="filerow__desc">{work.data.summary}</span>
-                {work.data.stack.length > 0 && (
-                  <ul class="stack">
-                    {work.data.stack.map((item) => (
-                      <li>{item}</li>
-                    ))}
-                  </ul>
-                )}
+            <div class="result">
+              <div class="result__meta">
+                <span>/works/{work.id}/</span>
+                <span>{work.data.year}</span>
               </div>
-            </li>
+              <a class="result__title" href={`/works/${work.id}/`}>{work.data.title}</a>
+              <p class="result__snippet">{work.data.summary}</p>
+              {work.data.stack.length > 0 && (
+                <ul class="stack-list">
+                  {work.data.stack.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
       )
     }
   </div>

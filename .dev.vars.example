@@ -1,0 +1,3 @@
+# これを .dev.vars にコピーして値を入れる（.dev.vars は git に入らない）。
+# 本番は `wrangler secret put ANTHROPIC_API_KEY` で登録する。
+ANTHROPIC_API_KEY="sk-ant-..."

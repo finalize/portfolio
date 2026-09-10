@@ -3,7 +3,6 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Prompt from '../../components/Prompt.astro';
 import TermPic from '../../components/TermPic.astro';
 import { getWorks } from '../../lib/content';
 
@@ -27,57 +26,55 @@ const hasThumb = existsSync(path.resolve(process.cwd(), thumb));
 ---
 
 <BaseLayout title={title} description={summary} type="article">
-  <Prompt cmd={`cat works/${work.id}.md`} />
-  <div class="output">
-    <article class="article">
-      <header class="post-header">
-        <h1>{title}</h1>
-        <p class="post-meta"><span>{year}</span><span>{summary}</span></p>
-      </header>
+  <article class="article">
+    <header class="post-header">
+      <h1>{title}</h1>
+      <p class="post-meta"><span>{year}</span><span>{summary}</span></p>
+    </header>
 
+    {
+      hasThumb && (
+        <div class="work-thumb">
+          <TermPic
+            src={thumb}
+            alt={`${title} の画面を termpic でマス目に落として描いたもの`}
+            mode="quadrant"
+            cols={64}
+            width={420}
+          />
+        </div>
+      )
+    }
+
+    <dl class="kv">
       {
-        hasThumb && (
-          <div class="work-thumb">
-            <TermPic
-              src={thumb}
-              alt={`${title} の画面をマス目に落として描いたもの`}
-              mode="quadrant"
-              cols={64}
-              width={420}
-            />
-          </div>
+        stack.length > 0 && (
+          <Fragment>
+            <dt>stack</dt>
+            <dd>{stack.join(' / ')}</dd>
+          </Fragment>
         )
       }
+      {
+        url && (
+          <Fragment>
+            <dt>site</dt>
+            <dd><a href={url}>{url}</a></dd>
+          </Fragment>
+        )
+      }
+      {
+        repo && (
+          <Fragment>
+            <dt>repo</dt>
+            <dd><a href={repo}>{repo}</a></dd>
+          </Fragment>
+        )
+      }
+    </dl>
 
-      <dl class="kv">
-        {
-          stack.length > 0 && (
-            <Fragment>
-              <dt>stack</dt>
-              <dd>{stack.join(' / ')}</dd>
-            </Fragment>
-          )
-        }
-        {
-          url && (
-            <Fragment>
-              <dt>site</dt>
-              <dd><a href={url}>{url}</a></dd>
-            </Fragment>
-          )
-        }
-        {
-          repo && (
-            <Fragment>
-              <dt>repo</dt>
-              <dd><a href={repo}>{repo}</a></dd>
-            </Fragment>
-          )
-        }
-      </dl>
+    <Content />
+  </article>
 
-      <Content />
-    </article>
-    <p class="tiny"><a href="/works/">← cd ../</a></p>
-  </div>
+  <a class="backlink" href="/works/">← works</a>
 </BaseLayout>

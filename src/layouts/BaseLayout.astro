@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { NAV, SITE } from '../consts';
-import Prompt from '../components/Prompt.astro';
+import SearchBox from '../components/SearchBox.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 
 interface Props {
@@ -11,6 +11,12 @@ interface Props {
   type?: 'website' | 'article';
   publishedAt?: Date;
   noindex?: boolean;
+  /**
+   * hero = 検索窓を画面の中央に大きく出す（ホームで、まだ何も聞かれていないとき）。
+   * results = 上に細く固定する。ホーム以外は常にこちら。
+   * ホームでも `?q=` が付いていれば head のスクリプトが results に直す。
+   */
+  mode?: 'hero' | 'results';
 }
 
 const {
@@ -19,6 +25,7 @@ const {
   type = 'website',
   publishedAt,
   noindex = false,
+  mode = 'results',
 } = Astro.props;
 
 const pathname = Astro.url.pathname.replace(/\/+$/, '');
@@ -28,18 +35,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og.png', Astro.site);
 const feed = new URL('/rss.xml', Astro.site);
 
-const pageTitle = isHome
-  ? `${SITE.name} — ${SITE.displayName}`
-  : `${title} · ${SITE.name}`;
-const windowTitle = `${SITE.user}@web: ~${pathname}`;
+const pageTitle = isHome ? `${SITE.name} — ${SITE.displayName}` : `${title} · ${SITE.name}`;
 const year = new Date().getFullYear();
-
-const isCurrent = (href: string) =>
-  pathname === href || pathname.startsWith(`${href}/`);
 ---
 
 <!doctype html>
-<html lang={SITE.lang}>
+<html lang={SITE.lang} data-mode={mode}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -50,7 +51,8 @@ const isCurrent = (href: string) =>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#0b0e0f" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#202124" />
 
     <meta property="og:type" content={type} />
     <meta property="og:title" content={isHome ? pageTitle : title} />
@@ -75,14 +77,26 @@ const isCurrent = (href: string) =>
 
     <script is:inline>
       (() => {
-        let theme = 'dark';
+        const root = document.documentElement;
+
+        // 配色。保存された選択がいちばん強く、無ければ OS の設定、それも取れなければライト
+        let theme = 'light';
         try {
           const stored = localStorage.getItem('theme');
-          if (stored === 'light' || stored === 'dark') theme = stored;
+          if (stored === 'light' || stored === 'dark') {
+            theme = stored;
+          } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            theme = 'dark';
+          }
         } catch {
-          /* localStorage が使えない環境ではデフォルトのまま */
+          /* localStorage が使えない環境ではライトのまま */
         }
-        document.documentElement.dataset.theme = theme;
+        root.dataset.theme = theme;
+
+        // `?q=` 付きで開かれたときは、hero を一瞬見せずに最初から results にする
+        if (root.dataset.mode === 'hero' && new URLSearchParams(location.search).get('q')) {
+          root.dataset.mode = 'results';
+        }
       })();
     </script>
   </head>
@@ -90,47 +104,28 @@ const isCurrent = (href: string) =>
   <body>
     <a class="skip-link" href="#main">本文へスキップ</a>
 
-    <div class="shell">
-      <div class="titlebar">
-        <div class="titlebar__dots" aria-hidden="true">
-          <span></span><span></span><span></span>
-        </div>
-        <p class="titlebar__title">{windowTitle}</p>
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a class="brand" href="/">{SITE.user}<span class="brand__dot">.</span>jp</a>
+        <SearchBox />
+        <slot name="under-search" />
+      </div>
+    </header>
+
+    <main class="content" id="main">
+      <div class="content__inner">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <span>© {year} {SITE.displayName}</span>
+        {NAV.map((item) => <a href={`${item.href}/`}>{item.name}</a>)}
+        <a href="/rss.xml">rss</a>
+        <span class="footer__spacer"></span>
         <ThemeToggle />
       </div>
-
-      <div class="screen">
-        <header>
-          <Prompt cmd="ls" />
-          <nav class="nav" aria-label="サイト内ナビゲーション">
-            <a href="/" aria-label="ホーム" aria-current={isHome ? 'page' : undefined}>~/</a>
-            {
-              NAV.map((item) => (
-                <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
-                  {item.name}/
-                </a>
-              ))
-            }
-          </nav>
-        </header>
-
-        <main id="main">
-          <slot />
-        </main>
-
-        <footer class="footer">
-          <div class="prompt">
-            <span class="prompt__path" aria-hidden="true">~/{SITE.user}</span>
-            <span class="prompt__sigil" aria-hidden="true">$</span>
-            <span class="cursor" aria-hidden="true"></span>
-          </div>
-          <div class="footer__links">
-            <span># © {year} {SITE.displayName}</span>
-            <a href="/rss.xml">rss</a>
-            <a href="/sitemap-index.xml">sitemap</a>
-          </div>
-        </footer>
-      </div>
-    </div>
+    </footer>
   </body>
 </html>

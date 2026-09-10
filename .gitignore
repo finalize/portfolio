@@ -22,3 +22,10 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Cloudflare のローカル開発用シークレット（ANTHROPIC_API_KEY など）
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+# wrangler のローカル状態
+.wrangler/
