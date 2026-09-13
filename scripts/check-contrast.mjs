@@ -13,27 +13,29 @@ const CSS_PATH = new URL("../src/styles/global.css", import.meta.url);
 
 /**
  * 実際に画面上で重なる組み合わせだけを並べる。
- * 本文は .shell（--bg-elev）の上に載るので、--bg ではなく --bg-elev が背景になる。
+ * 本文は素の背景（--bg）の上に載る。チップ・タグ・コードだけが --bg-inset に載る。
  */
 const PAIRS = [
-  { label: "本文", fg: "--fg", bg: "--bg-elev" },
-  { label: "補足テキスト", fg: "--fg-dim", bg: "--bg-elev" },
-  { label: "プロンプトのパス・現在ページ", fg: "--accent", bg: "--bg-elev" },
-  { label: "リンク・コマンド名", fg: "--accent-2", bg: "--bg-elev" },
-  { label: "日付・タグ", fg: "--accent-3", bg: "--bg-elev" },
-  { label: "404 のエラー行", fg: "--danger", bg: "--bg-elev" },
-  { label: "タイトルバーの文字", fg: "--fg-dim", bg: "--bg-inset" },
+  { label: "本文", fg: "--fg", bg: "--bg" },
+  { label: "スニペット・メタ", fg: "--fg-dim", bg: "--bg" },
+  { label: "検索結果のタイトル", fg: "--accent-2", bg: "--bg" },
+  { label: "主要な操作・フォーカス", fg: "--accent", bg: "--bg" },
+  { label: "日付・タグ", fg: "--accent-3", bg: "--bg" },
+  { label: "エラー・下書き表示", fg: "--danger", bg: "--bg" },
+  { label: "タグの文字", fg: "--accent-3", bg: "--bg-inset" },
+  { label: "チップの文字", fg: "--fg-dim", bg: "--bg-inset" },
   { label: "インラインコード", fg: "--fg", bg: "--bg-inset" },
+  { label: "フッターの文字", fg: "--fg-dim", bg: "--bg-elev" },
+  { label: "表の見出し", fg: "--fg", bg: "--bg-elev" },
   // 枠線は文字ではないので WCAG 1.4.11 の 3:1（large の閾値と同値なので流用する）。
-  // ただし情報を伝えない装飾の枠線は対象外で、このサイトの枠線は
-  // ターミナル風の見た目のためのもの。判断が分かれるので参考表示に留め、
-  // これだけではビルドを落とさない。
-  { label: "枠線（参考・非テキスト 3:1）", fg: "--border", bg: "--bg-elev", large: true, advisory: true },
+  // ただし情報を伝えない装飾の枠線は対象外で、このサイトの枠線は面を仕切るためのもの。
+  // 判断が分かれるので参考表示に留め、これだけではビルドを落とさない。
+  { label: "枠線（参考・非テキスト 3:1）", fg: "--border", bg: "--bg", large: true, advisory: true },
 ];
 
 const THEMES = [
-  { name: "dark", selector: ":root" },
-  { name: "light", selector: ':root[data-theme="light"]' },
+  { name: "light", selector: ":root" },
+  { name: "dark", selector: ':root[data-theme="dark"]' },
 ];
 
 function readPalette(css, selector) {
@@ -44,15 +46,22 @@ function readPalette(css, selector) {
   return parseCssVariables(block);
 }
 
-const css = await readFile(CSS_PATH, "utf8");
+/*
+   contrast-kit の extractRuleBlock はセレクタを素の indexOf で探すので、
+   コメントの中にセレクタ名が書いてあると、そちらを先に拾って別のブロックを返す。
+   （実際に :root[data-theme="dark"] という文字列を冒頭のコメントに書いたら、
+     ダークテーマがライトの値で検査され、素通りしていた）
+   検査の前にコメントを落としておく。
+*/
+const css = (await readFile(CSS_PATH, "utf8")).replace(/\/\*[\s\S]*?\*\//g, "");
 const base = readPalette(css, THEMES[0].selector);
 
 let failures = 0;
 console.log("配色チェック（src/styles/global.css）\n");
 
 for (const theme of THEMES) {
-  // ライトテーマは上書きした変数だけを持つので、ダークの値に重ねて解決する
-  const palette = theme.name === "dark" ? base : { ...base, ...readPalette(css, theme.selector) };
+  // ダークテーマは上書きした変数だけを持つので、ライトの値に重ねて解決する
+  const palette = theme.name === "light" ? base : { ...base, ...readPalette(css, theme.selector) };
 
   const missing = PAIRS.flatMap(({ fg, bg }) => [fg, bg]).filter((name) => !palette[name]);
   if (missing.length > 0) {

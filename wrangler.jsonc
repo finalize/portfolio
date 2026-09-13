@@ -1,10 +1,38 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "shogo-site",
+  // Astro の Cloudflare アダプタが用意する Worker のエントリ。
+  // ページは全部ビルド時に静的化され、ASSETS から配信される。
+  // Worker が実際に動くのは prerender = false のルート（/api/ask）だけ。
+  "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-08-22",
-  // Astro の静的ビルド結果をそのまま配信する。Worker のコードは持たない（main なし）
+  "compatibility_flags": ["nodejs_compat"],
+  // ここに書いた値は、ビルド時にアダプタが dist/server/wrangler.json へ写し替える。
+  // 実際に deploy / dev で読ませるのはそちら（package.json の ship / dev:worker を見る）。
   "assets": {
-    "directory": "./dist",
+    "directory": "./dist/client",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
-  }
+  },
+  "observability": {
+    // 質問ログ（console.log の JSON）をここで見る
+    "enabled": true
+  },
+  // 質問 → 回答のキャッシュと、アダプタが要求するセッション用の入れもの。
+  // どちらも最初の deploy で自動作成された。id を固定してあるのは、
+  // CI からのデプロイで作成の確認が要らないようにするため（対話プロンプトが出せない）。
+  // ローカルの wrangler dev では id を見ずに ./.wrangler 配下に模擬される。
+  "kv_namespaces": [
+    { "binding": "ANSWERS", "id": "ee1e2765d2e64b689993a7aada971189" },
+    { "binding": "SESSION", "id": "800693c47dc54df0b51abebd1bcc80ec" }
+  ],
+  // IP 単位のレート制限。namespace_id はアカウント内で一意な任意の番号で、
+  // Cloudflare 側にリソースを作る必要はない。period は 10 か 60 のみ。
+  "ratelimits": [
+    {
+      "name": "ASK_LIMIT",
+      "namespace_id": "1001",
+      "simple": { "limit": 8, "period": 60 }
+    }
+  ]
 }

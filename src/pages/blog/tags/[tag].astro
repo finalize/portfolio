@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Prompt from '../../../components/Prompt.astro';
 import { collectTags, formatDate, getPosts } from '../../../lib/content';
 
 export async function getStaticPaths() {
@@ -18,24 +17,29 @@ const { tag, posts } = Astro.props;
 ---
 
 <BaseLayout title={`#${tag}`} description={`${tag} に関する記事の一覧。`}>
-  <Prompt cmd={`grep -rl "#${tag}" blog/`} />
-  <div class="output">
-    <h1 class="comment">#{tag} の記事（{posts.length}件）</h1>
-    <ul class="filelist">
+  <div class="stack-lg">
+    <div>
+      <h1 class="page-title">タグ: {tag}</h1>
+      <p class="page-lead">{posts.length} 件。</p>
+    </div>
+
+    <div class="results">
       {
         posts.map((post) => (
-          <li class="filerow">
-            <time class="filerow__meta" datetime={post.data.pubDate.toISOString()}>
-              {formatDate(post.data.pubDate)}
-            </time>
-            <div>
-              <a class="filerow__name" href={`/blog/${post.id}/`}>{post.data.title}</a>
-              <span class="filerow__desc">{post.data.description}</span>
+          <div class="result">
+            <div class="result__meta">
+              <span>/blog/{post.id}/</span>
+              <time datetime={post.data.pubDate.toISOString()}>
+                {formatDate(post.data.pubDate)}
+              </time>
             </div>
-          </li>
+            <a class="result__title" href={`/blog/${post.id}/`}>{post.data.title}</a>
+            <p class="result__snippet">{post.data.description}</p>
+          </div>
         ))
       }
-    </ul>
-    <p class="tiny"><a href="/blog/">← cd ../</a></p>
+    </div>
   </div>
+
+  <a class="backlink" href="/blog/">← blog</a>
 </BaseLayout>

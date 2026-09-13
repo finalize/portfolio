@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Prompt from '../../components/Prompt.astro';
 import { formatDate, getLogEntries, groupByMonth } from '../../lib/content';
 
 const entries = await getLogEntries();
@@ -8,59 +7,51 @@ const months = groupByMonth(entries);
 const changed = entries.filter((entry) => entry.data.status === 'changed').length;
 ---
 
-<BaseLayout
-  title="Log"
-  description="このサイトの整備ログ。毎日の点検と、直した内容の記録。"
->
-  <Prompt cmd="tail -f log/maintenance.log" />
-  <div class="output">
-    <h1 class="comment">整備ログ</h1>
-    <p class="muted">
-      このサイトは毎日 09:00 に Claude が点検し、直せるものはその場で直しています。その記録です。
-    </p>
+<BaseLayout title="Log" description="このサイトの整備ログ。毎日の点検と、直した内容の記録。">
+  <div class="stack-lg">
+    <div>
+      <h1 class="page-title">整備ログ</h1>
+      <p class="page-lead">
+        このサイトは毎日 Claude が点検し、直せるものはその場で直しています。その記録。
+        {entries.length > 0 && `${entries.length} 件のうち、変更あり ${changed} 件。`}
+      </p>
+    </div>
+
     {
-      entries.length > 0 && (
-        <p class="muted tiny">
-          記録 {entries.length} 件 / うち変更あり {changed} 件
-        </p>
-      )
-    }
-  </div>
-
-  {
-    months.map(({ month, entries: monthly }) => (
-      <section class="output logmonth">
-        <h2 class="comment">{month}</h2>
-        <ul class="loglist">
-          {monthly.map((entry) => (
-            <li class="logrow">
-              <time class="logrow__date" datetime={entry.data.date.toISOString()}>
-                {formatDate(entry.data.date)}
-              </time>
-              <span class={`logrow__status logrow__status--${entry.data.status}`}>
-                [{entry.data.status}]
-              </span>
-              <div>
-                <a class="logrow__summary" href={`/log/${entry.id}/`}>{entry.data.summary}</a>
-                <span class="logrow__refs">
-                  {entry.data.pr && (
-                    <a href={`https://github.com/finalize/portfolio/pull/${entry.data.pr}`}>
-                      PR #{entry.data.pr}
-                    </a>
-                  )}
-                  {entry.data.issue && (
-                    <a href={`https://github.com/finalize/portfolio/issues/${entry.data.issue}`}>
-                      issue #{entry.data.issue}
-                    </a>
-                  )}
+      months.map(({ month, entries: monthly }) => (
+        <section class="logmonth">
+          <h2>{month}</h2>
+          <ul class="loglist">
+            {monthly.map((entry) => (
+              <li class="logrow">
+                <time class="logrow__date" datetime={entry.data.date.toISOString()}>
+                  {formatDate(entry.data.date)}
+                </time>
+                <span class={`logrow__status logrow__status--${entry.data.status}`}>
+                  {entry.data.status}
                 </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))
-  }
+                <div>
+                  <a href={`/log/${entry.id}/`}>{entry.data.summary}</a>
+                  <span class="logrow__refs">
+                    {entry.data.pr && (
+                      <a href={`https://github.com/finalize/portfolio/pull/${entry.data.pr}`}>
+                        PR #{entry.data.pr}
+                      </a>
+                    )}
+                    {entry.data.issue && (
+                      <a href={`https://github.com/finalize/portfolio/issues/${entry.data.issue}`}>
+                        issue #{entry.data.issue}
+                      </a>
+                    )}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
 
-  {entries.length === 0 && <p class="muted">まだ記録がありません。</p>}
+    {entries.length === 0 && <p class="muted">まだ記録がありません。</p>}
+  </div>
 </BaseLayout>

@@ -1,7 +1,8 @@
 /**
  * favicon / OGP 画像を SVG から生成する。
  *   node scripts/generate-images.mjs
- * 名前や肩書きを変えたら OG_TEXT を直して再実行する（src/consts.ts と揃える）。
+ * 名前や文言を変えたら OG_TEXT を直して再実行する（src/consts.ts と揃える）。
+ * 色は src/styles/global.css のライトテーマのトークンと同じ値にしてある。
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import { readFile } from 'node:fs/promises';
@@ -13,38 +14,42 @@ const root = path.dirname(fileURLToPath(new URL('../package.json', import.meta.u
 const publicDir = path.join(root, 'public');
 
 const OG_TEXT = {
-  prompt: '~/shogo',
-  command: 'whoami',
-  name: 'Shogo',
-  role: 'Software Engineer',
   site: 'shogo.jp',
+  placeholder: 'Shogo について検索',
+  lead: '作ったものと、書いたものについて答えるサイト',
 };
 
-const FONT = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+/* src/styles/global.css のライトテーマのトークンと同じ値にすること */
+const COLOR = {
+  bg: '#ffffff',
+  fg: '#202124',
+  dim: '#5f6368',
+  accent: '#0b57d0',
+  border: '#dadce0',
+};
 
+const FONT =
+  '-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, Hiragino Sans, Yu Gothic, sans-serif';
+
+/* トップページそのままの絵にする。何ができるサイトなのかが1枚で分かる */
 const ogSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#0b0e0f"/>
+  <rect width="1200" height="630" fill="${COLOR.bg}"/>
+
+  <text x="600" y="248" text-anchor="middle" font-family="${FONT}" font-size="86" font-weight="500" fill="${COLOR.fg}"
+    >shogo<tspan fill="${COLOR.accent}">.</tspan>jp</text>
+
   <g>
-    <rect x="80" y="85" width="1040" height="460" rx="18" fill="#131819" stroke="#223028" stroke-width="2"/>
-    <path d="M80 103 a18 18 0 0 1 18-18 h1004 a18 18 0 0 1 18 18 v43 h-1040 z" fill="#0f1415"/>
-    <line x1="80" y1="146" x2="1120" y2="146" stroke="#223028" stroke-width="2"/>
-    <circle cx="114" cy="115" r="7" fill="#ff5f57"/>
-    <circle cx="140" cy="115" r="7" fill="#febc2e"/>
-    <circle cx="166" cy="115" r="7" fill="#28c840"/>
+    <rect x="270" y="316" width="660" height="86" rx="43" fill="${COLOR.bg}" stroke="${COLOR.border}" stroke-width="2"/>
+    <g fill="none" stroke="${COLOR.dim}" stroke-width="3.4" stroke-linecap="round">
+      <circle cx="326" cy="357" r="13"/>
+      <line x1="336" y1="367" x2="346" y2="377"/>
+    </g>
+    <text x="374" y="370" font-family="${FONT}" font-size="30" fill="${COLOR.dim}">${OG_TEXT.placeholder}</text>
+    <rect x="800" y="336" width="110" height="46" rx="23" fill="#f1f3f4"/>
+    <text x="855" y="366" text-anchor="middle" font-family="${FONT}" font-size="24" fill="${COLOR.fg}">検索</text>
   </g>
-  <g font-family="${FONT}" font-size="30">
-    <text x="132" y="232" fill="#7ee787" font-weight="700">${OG_TEXT.prompt}</text>
-    <text x="268" y="232" fill="#8b9a93">$</text>
-    <text x="300" y="232" fill="#79c0ff">${OG_TEXT.command}</text>
-  </g>
-  <text x="132" y="336" font-family="${FONT}" font-size="82" font-weight="700" fill="#cfd8d3">${OG_TEXT.name}</text>
-  <text x="132" y="392" font-family="${FONT}" font-size="34" fill="#8b9a93">— ${OG_TEXT.role}</text>
-  <g font-family="${FONT}" font-size="30">
-    <text x="132" y="482" fill="#7ee787" font-weight="700">${OG_TEXT.prompt}</text>
-    <text x="268" y="482" fill="#8b9a93">$</text>
-    <rect x="300" y="459" width="17" height="30" fill="#7ee787"/>
-  </g>
-  <text x="1088" y="482" text-anchor="end" font-family="${FONT}" font-size="28" fill="#8b9a93">${OG_TEXT.site}</text>
+
+  <text x="600" y="472" text-anchor="middle" font-family="${FONT}" font-size="28" fill="${COLOR.dim}">${OG_TEXT.lead}</text>
 </svg>`;
 
 await mkdir(publicDir, { recursive: true });

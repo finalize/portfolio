@@ -1,19 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Prompt from '../components/Prompt.astro';
 import { SOCIALS } from '../consts';
 ---
 
-<BaseLayout
-  title="Contact"
-  description="お問い合わせ先（メール・SNS）。"
->
-  <Prompt cmd="cat contact.txt" />
-  <div class="output">
-    <h1 class="comment">Contact</h1>
-    <p class="muted">
-      お仕事のご相談・ご質問はメールか SNS のDMへどうぞ。だいたい数日以内に返信します。
-    </p>
+<BaseLayout title="Contact" description="お問い合わせ先（メール・SNS）。">
+  <div class="stack-lg">
+    <div>
+      <h1 class="page-title">Contact</h1>
+      <p class="page-lead">
+        お仕事のご相談・ご質問はメールか SNS の DM へどうぞ。だいたい数日以内に返信します。
+      </p>
+    </div>
+
     <dl class="kv">
       {
         SOCIALS.map((social) => (

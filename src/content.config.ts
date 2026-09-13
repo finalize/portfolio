@@ -46,4 +46,18 @@ const log = defineCollection({
   }),
 });
 
-export const collections = { blog, works, log };
+/**
+ * LLM に渡す事実集合のうち、blog / works のページになっていないもの。
+ * ここに書いていないことは「持っていない情報」として扱われる。
+ * 推測で書き足さないこと（src/pages/api/ask.ts の系統プロンプトがこの前提で書かれている）。
+ */
+const facts = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/facts' }),
+  schema: z.object({
+    title: z.string(),
+    /** 大きいほど系統プロンプトの前に置かれる */
+    priority: z.number().default(0),
+  }),
+});
+
+export const collections = { blog, works, log, facts };

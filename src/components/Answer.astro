@@ -1,0 +1,243 @@
+---
+/**
+ * ホームだけに置く、回答の表示。
+ *
+ * 上部バーの検索窓（SearchBox.astro）の送信を横取りして `/api/ask` に問い合わせ、
+ * 返ってきたブロックをここに描く。URL には `?q=` を積むので、
+ * 戻るボタンが効き、答えのリンクを人に渡せる。
+ *
+ * LLM の出力は文字列としてしか扱わない（innerHTML は使わない）。
+ * リンク先はサーバ側で実在するページに限定済み。
+ */
+---
+
+<div class="answer-root" id="answer-root" aria-live="polite" aria-busy="false"></div>
+
+<script>
+  type FileRow = { meta: string; name: string; desc: string; href: string };
+  type Block =
+    | { type: 'text'; body: string }
+    | { type: 'filelist'; items: FileRow[] }
+    | { type: 'kv'; rows: { key: string; value: string; href: string }[] }
+    | { type: 'table'; head: string[]; rows: string[][] }
+    | { type: 'links'; items: { label: string; href: string }[] }
+    | { type: 'notfound'; message: string };
+  type Answer = {
+    how: string;
+    blocks: Block[];
+    sources: string[];
+    suggestions: string[];
+  };
+
+  const form = document.querySelector<HTMLFormElement>('#searchform');
+  const input = document.querySelector<HTMLInputElement>('#q');
+  const root = document.querySelector<HTMLElement>('#answer-root');
+
+  if (form && input && root) {
+    /** 要素を作る。中身は textContent でしか入れない */
+    function el<K extends keyof HTMLElementTagNameMap>(
+      tag: K,
+      className?: string,
+      text?: string,
+    ): HTMLElementTagNameMap[K] {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function link(text: string, href: string, className?: string): HTMLElement {
+      const anchor = el('a', className, text);
+      anchor.href = href;
+      if (/^https?:/.test(href)) {
+        anchor.rel = 'noopener noreferrer';
+        anchor.target = '_blank';
+      }
+      return anchor;
+    }
+
+    /** 検索結果1件ぶん。リンク先が無ければタイトルはただの文字 */
+    function resultRow(row: FileRow): HTMLElement {
+      const item = el('div', 'result');
+
+      const meta = el('div', 'result__meta');
+      if (row.href) meta.append(el('span', undefined, row.href));
+      if (row.meta) meta.append(el('span', undefined, row.meta));
+      if (meta.childElementCount > 0) item.append(meta);
+
+      item.append(
+        row.href
+          ? link(row.name, row.href, 'result__title')
+          : el('span', 'result__title', row.name),
+      );
+      if (row.desc) item.append(el('p', 'result__snippet', row.desc));
+      return item;
+    }
+
+    function renderBlock(block: Block): HTMLElement | null {
+      switch (block.type) {
+        case 'text': {
+          const wrap = el('div', 'answer__text');
+          for (const paragraph of block.body.split('\n').filter(Boolean)) {
+            wrap.append(el('p', undefined, paragraph));
+          }
+          return wrap;
+        }
+        case 'notfound': {
+          const wrap = el('div', 'answer__notfound');
+          wrap.append(el('p', undefined, block.message));
+          return wrap;
+        }
+        case 'filelist': {
+          const list = el('div', 'results');
+          for (const row of block.items) list.append(resultRow(row));
+          return list;
+        }
+        case 'kv': {
+          const list = el('dl', 'kv');
+          for (const row of block.rows) {
+            list.append(el('dt', undefined, row.key));
+            const dd = el('dd');
+            dd.append(row.href ? link(row.value, row.href) : document.createTextNode(row.value));
+            list.append(dd);
+          }
+          return list;
+        }
+        case 'table': {
+          const scroll = el('div', 'table-scroll');
+          const table = el('table');
+          const thead = el('thead');
+          const headRow = el('tr');
+          for (const cell of block.head) headRow.append(el('th', undefined, cell));
+          thead.append(headRow);
+          const tbody = el('tbody');
+          for (const cells of block.rows) {
+            const tr = el('tr');
+            for (const cell of cells) tr.append(el('td', undefined, cell));
+            tbody.append(tr);
+          }
+          table.append(thead, tbody);
+          scroll.append(table);
+          return scroll;
+        }
+        case 'links': {
+          const wrap = el('div', 'answer__links');
+          for (const item of block.items) wrap.append(link(`→ ${item.label}`, item.href));
+          return wrap;
+        }
+        default:
+          return null;
+      }
+    }
+
+    function renderAnswer(answer: Answer): HTMLElement {
+      const wrap = el('div', 'answer');
+
+      if (answer.how) {
+        wrap.append(el('p', 'answer__how', answer.how));
+      }
+      for (const block of answer.blocks) {
+        const node = renderBlock(block);
+        if (node) wrap.append(node);
+      }
+      if (answer.sources.length > 0) {
+        const refs = el('div', 'answer__refs');
+        refs.append(el('span', undefined, '参照:'));
+        for (const source of answer.sources) refs.append(link(source, source));
+        wrap.append(refs);
+      }
+      if (answer.suggestions.length > 0) {
+        const chips = el('div', 'chips');
+        chips.append(el('span', 'chips__label', '続けて聞けること'));
+        for (const suggestion of answer.suggestions) {
+          const chip = el('button', 'chip', suggestion);
+          chip.type = 'button';
+          chip.dataset.q = suggestion;
+          chips.append(chip);
+        }
+        wrap.append(chips);
+      }
+      return wrap;
+    }
+
+    let pending = false;
+
+    async function ask(question: string) {
+      const trimmed = question.trim();
+      if (!trimmed || pending) return;
+
+      pending = true;
+      input!.value = trimmed;
+      input!.disabled = true;
+      document.documentElement.dataset.mode = 'results';
+      root!.setAttribute('aria-busy', 'true');
+
+      const waiting = el('div', 'answer__waiting');
+      waiting.append(el('span', 'spinner'), el('span', undefined, '調べている'));
+      root!.replaceChildren(waiting);
+
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ q: trimmed }),
+        });
+        const data = (await response.json()) as { answer?: Answer };
+        if (!data.answer) throw new Error('empty answer');
+        root!.replaceChildren(renderAnswer(data.answer));
+      } catch {
+        const failed = el('div', 'answer__notfound');
+        failed.append(el('p', undefined, '通信に失敗した。もう一度試してほしい。'));
+        root!.replaceChildren(failed);
+      } finally {
+        pending = false;
+        input!.disabled = false;
+        root!.setAttribute('aria-busy', 'false');
+      }
+    }
+
+    /** 質問が無い状態（トップ）に戻す */
+    function reset() {
+      document.documentElement.dataset.mode = 'hero';
+      root!.replaceChildren();
+      input!.value = '';
+    }
+
+    /** URL の `?q=` を今の状態に合わせる。戻るボタンが効くようにする */
+    function push(question: string) {
+      const url = question ? `/?q=${encodeURIComponent(question)}` : '/';
+      if (url !== location.pathname + location.search) {
+        history.pushState({ q: question }, '', url);
+      }
+    }
+
+    function currentQuery(): string {
+      return new URLSearchParams(location.search).get('q')?.trim() ?? '';
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+      push(question);
+      void ask(question);
+    });
+
+    document.addEventListener('click', (event) => {
+      const chip = (event.target as HTMLElement).closest<HTMLElement>('.chip');
+      if (!chip?.dataset.q) return;
+      push(chip.dataset.q);
+      void ask(chip.dataset.q);
+    });
+
+    window.addEventListener('popstate', () => {
+      const question = currentQuery();
+      if (question) void ask(question);
+      else reset();
+    });
+
+    // `?q=` 付きで開かれた（リンクを踏んだ・ホーム以外から検索した）場合
+    const initial = currentQuery();
+    if (initial) void ask(initial);
+  }
+</script>
