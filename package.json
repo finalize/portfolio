@@ -20,7 +20,7 @@
     "check:answer": "node scripts/check-answer.mts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.126.0",
+    "@anthropic-ai/sdk": "^0.127.0",
     "@astrojs/cloudflare": "^14.3.2",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
@@ -32,6 +32,6 @@
     "sharp": "^0.35.4",
     "termpic": "^0.2.2",
     "typescript": "^6.0.3",
-    "wrangler": "^4.134.0"
+    "wrangler": "^4.135.0"
   }
 }
