@@ -57,10 +57,11 @@ src/
 ├─ lib/
 │  ├─ content.ts        一覧の取得・整形
 │  ├─ corpus.ts         事実集合の組み立て・質問の正規化・ハッシュ
-│  └─ answer.ts         回答の型 / JSON Schema / sanitizeAnswer（安全境界）
+│  ├─ answer.ts         回答の型 / JSON Schema / sanitizeAnswer（安全境界）
+│  └─ space.ts          ホームの 3D 背景（three.js。ブラウザ専用）。ロゴの形は space-logos.ts
 ├─ layouts/             BaseLayout（全ページ） / PostLayout（記事）
 ├─ components/          SearchBox（全ページの検索窓） / Answer（ホームの回答表示）
-│                       ThemeToggle / TermPic
+│                       SpaceBackground（ホームの 3D 背景） / ThemeToggle / TermPic
 ├─ styles/global.css    デザイントークンと全スタイル
 └─ pages/
    ├─ api/ask.ts        唯一の動的ルート（prerender = false）
@@ -106,6 +107,18 @@ wrangler.jsonc          Worker とバインディングの設定
 - Google の UI 青 `#1a73e8` は白地で 3.9:1 しかなく、この検査に落ちる。リンクには `#1a0dab` を使っている。
 - 上部バーは `.topbar`、状態は `<html>` の `data-mode`（`hero` / `results`）で切り替える。
   DOM は動かさず CSS だけで縮める。`hero` は「ホームで、まだ何も聞かれていないとき」だけ。
+- **ホームの `hero` のあいだだけ、three.js の 3D 背景（ロゴが宇宙を流れてくる）を敷く。**
+  `SpaceBackground.astro` が hero になってから `src/lib/space.ts` を動的に読み込む（three.js は gzip で 150KB あるので、
+  ページには含めない。`?q=` 付きで開かれたら読まない）。results になったら描画を止めて隠す。
+  - 色は `space.ts` がトークン（`--bg` / `--fg` / `--fg-dim` / `--accent*`）を読んで塗る。ブランドの色は使わない。
+    配色を切り替えると塗り直す。
+  - 真ん中は `.space` の `mask-image` で抜いてあり、ロゴ・検索窓・例の質問は素の `--bg` の上に載る。
+    配色検査はこの前提で通しているので、マスクを狭めない。
+  - 動きを減らす設定（prefers-reduced-motion）では、流さず視差も付けず、その場でゆっくり回すだけにする。
+    WebGL が無ければ何も描かない。
+  - 浮かべるロゴは React（毎回出る）と、`space-logos.ts` の中から訪問のたびにランダムに選ぶ数種類（`KINDS_PER_VISIT`）。
+    `space-logos.ts` に足してよいのは、制作物・記事・整備ログに出てくるか、このサイト自体が使っている技術だけ
+    （使っていない技術のロゴは「使える人」に見えてしまう）。形は Simple Icons の path（CC0）。
 - 一覧（works / blog / タグ / LLM の filelist）は `.result` の見た目に揃える。
   上に薄くパス、次にタイトルのリンク、その下に説明。新しい一覧を足すときもこれに合わせる。
 - 画像は `<TermPic>` でマス目に落として置く。自作の道具の出力そのものなので残してある。

@@ -326,6 +326,49 @@ button {
   text-align: center;
 }
 
+/*
+   hero の背景（three.js。SpaceBackground.astro / src/lib/space.ts）
+
+   ページの後ろに固定で敷く。色は space.ts がトークンを読んで塗るので、ここでは決めない。
+   真ん中はマスクで抜いて、ロゴ・検索窓・例の質問の後ろを素の --bg のままにしておく
+   （文字が --bg の上に載る、という配色検査の前提を崩さないため）。
+   描き終わるまでと、results のあいだは見せない。
+*/
+.space {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.8s ease,
+    visibility 0.8s;
+  mask-image: radial-gradient(
+    ellipse min(46rem, 100vw) min(26rem, 44vh) at 50% 44%,
+    transparent 60%,
+    #000 100%
+  );
+}
+
+/* 地の --bg と重ねて薄める。ライトは白地に濃い色が載るので、ダークより控えめにする */
+:root[data-mode="hero"] .space[data-ready] {
+  opacity: 0.6;
+  visibility: visible;
+}
+
+:root[data-mode="hero"][data-theme="dark"] .space[data-ready] {
+  opacity: 0.9;
+}
+
+/* 背景を透かすため、hero のあいだは本文の地を塗らない（html が --bg を塗っている） */
+:root[data-mode="hero"] body,
+:root[data-mode="hero"] .topbar {
+  background: transparent;
+}
+
 /* =========================================================
    本文の器
    ========================================================= */
