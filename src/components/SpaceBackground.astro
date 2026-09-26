@@ -1,0 +1,43 @@
+---
+/**
+ * ホームの背景（three.js）。hero のあいだだけ見える。
+ *
+ * three.js は大きいので、ページには含めずに、hero になってから手が空いたときに読み込む。
+ * `?q=` 付きで開かれて最初から results のときは、hero に戻るまで読まない。
+ * 描いているのは src/lib/space.ts。
+ */
+---
+
+<canvas class="space" id="space" aria-hidden="true"></canvas>
+
+<script>
+  const canvas = document.querySelector<HTMLCanvasElement>('#space');
+  const root = document.documentElement;
+
+  if (canvas) {
+    let started = false;
+
+    const load = () => {
+      import('../lib/space')
+        .then(({ mountSpace }) => mountSpace(canvas))
+        .catch(() => {
+          /* 読み込めなければ背景が無いだけ */
+        });
+    };
+
+    const start = () => {
+      if (started || root.dataset.mode !== 'hero') return;
+      started = true;
+      observer.disconnect();
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(load, { timeout: 1500 });
+      } else {
+        setTimeout(load, 300);
+      }
+    };
+
+    const observer = new MutationObserver(start);
+    observer.observe(root, { attributes: true, attributeFilter: ['data-mode'] });
+    start();
+  }
+</script>
