@@ -20,11 +20,11 @@
     "check:answer": "node scripts/check-answer.mts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.133.0",
-    "@astrojs/cloudflare": "^14.3.4",
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@astrojs/cloudflare": "^14.4.0",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.3.8",
+    "astro": "^7.4.0",
     "three": "^0.186.1"
   },
   "devDependencies": {
@@ -34,6 +34,6 @@
     "sharp": "^0.35.5",
     "termpic": "^0.2.2",
     "typescript": "^6.0.3",
-    "wrangler": "^4.149.0"
+    "wrangler": "^4.151.0"
   }
 }
