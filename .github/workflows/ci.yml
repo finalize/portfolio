@@ -1,6 +1,6 @@
 name: CI
 
-# PR と push で型チェック・ビルドを回し、main では続けて Cloudflare へデプロイする。
+# PR と push で型チェックとビルドを回す。デプロイはしない（公開を止めている）。
 on:
   push:
     # claude/** も対象にするのは、Claude が作ったブランチのコミットに対して
@@ -10,11 +10,6 @@ on:
     branches: [main, "claude/**"]
   pull_request:
   workflow_dispatch:
-  schedule:
-    # 毎日 10:43 JST。自動マージ（GITHUB_TOKEN 経由）は main への push イベントを
-    # 発火させないため、Dependabot / Claude がマージした内容を取りこぼさないよう毎日 main を再デプロイする。
-    # 毎時ちょうどは GitHub 側の負荷が高いので、中途半端な時刻にしてある。
-    - cron: "43 1 * * *"
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.event_name }}
@@ -40,33 +35,3 @@ jobs:
         run: pnpm check
       - name: ビルド
         run: pnpm build
-
-  deploy:
-    name: deploy to Cloudflare
-    needs: build
-    if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      github.event_name == 'schedule' ||
-      github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          ref: main
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: ビルドしてデプロイ
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::notice::CLOUDFLARE_API_TOKEN が未設定のためデプロイをスキップしました"
-            exit 0
-          fi
-          pnpm run ship

@@ -20,7 +20,7 @@ GitHub のリポジトリ名は `portfolio`、Worker 名とローカルのディ
 | works のサムネイル元画像の再取得 | `node scripts/capture-works.mjs [<id>]` |
 
 - `deploy` という script 名は pnpm の組み込みコマンドと衝突して実行されないため、デプロイは `ship`。
-- 通常のデプロイは main への push で GitHub Actions が行う。`pnpm run ship` は手元から流したいとき用。
+- CI は型チェックとビルドだけで、デプロイはしない（公開を止めている。下の「自動化されていること」）。
 - `pnpm dev`（astro dev）でもバインディング（KV・レート制限）は使えるので、`/api/ask` はそのまま動く。
   アダプタの Vite プラグインが workerd 上で走らせているため。`pnpm run dev:worker` は「ビルド済みの成果物を
   本番と同じ経路で配信する」確認用で、普段は `pnpm dev` でよい。
@@ -186,12 +186,13 @@ wrangler.jsonc          Worker とバインディングの設定
 
 ## 自動化されていること
 
+2026-11-02 に公開を止めた。Cloudflare の Worker（`shogo-site`）と KV（`shogo-site-answers`・`shogo-site-session`）を消し、
+CI からデプロイを、依存の自動更新（Dependabot と自動マージ）を外した。また出すときは KV を作り直して `wrangler.jsonc` の id を書き換え、
+Worker のシークレット `ANTHROPIC_API_KEY` を入れ直してから `pnpm run ship`。
+
 | いつ | 何が起きるか |
 |---|---|
 | PR / push | CI（`pnpm check` + `pnpm build`） |
-| main への push | CI 通過後に Cloudflare へ自動デプロイ |
-| 毎日 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ |
-| 毎日 10:43 JST | main を再デプロイ（自動マージは push イベントを発火させないための取りこぼし対策） |
 | PR 作成時 | Claude がレビュー（bot が作った PR は対象外） |
 | `@claude` コメント | Claude が調査・修正して PR を更新する |
 
