@@ -62,6 +62,10 @@ draft: false
 
 ## デプロイ（Cloudflare Workers）
 
+いまは公開していない。2026-11-02 に Cloudflare の Worker（`shogo-site`）と KV（`shogo-site-answers`・`shogo-site-session`）を消し、
+CI からデプロイを外した。依存の自動更新（Dependabot と自動マージ）も止めた。
+また出すときは KV を作り直して `wrangler.jsonc` の id を書き換え、Worker のシークレット `ANTHROPIC_API_KEY` を入れ直してから、下の手順で出す。
+
 初回だけログインする。
 
 ```bash
@@ -93,9 +97,6 @@ OGP の文言は `scripts/generate-images.mjs` の `OG_TEXT` にある。
 | いつ | 何が起きるか | ファイル |
 |---|---|---|
 | PR / push | 型チェック（`pnpm check`）とビルド | `.github/workflows/ci.yml` |
-| main への push | CI 通過後に Cloudflare へ自動デプロイ | 同上（`deploy` ジョブ） |
-| 毎日 09:00 JST | Dependabot が依存更新 PR を作成。minor / patch は CI グリーンで自動マージ、メジャーはレビュー待ちで残る | `.github/dependabot.yml` / `dependabot-auto-merge.yml` |
-| 毎日 10:43 JST | main を再デプロイ | `ci.yml`（`schedule`） |
 | PR 作成時 | Claude がレビューしてインラインコメント（bot の PR は対象外） | `claude-review.yml` |
 | `@claude` コメント | Claude が調査・修正してブランチに push する | `claude.yml` |
 
@@ -116,14 +117,7 @@ Claude の PR は squash マージなので、1つのコミットが1回分の�
 
 ```bash
 git revert <コミット>
-git push origin main        # CI が走って自動で再デプロイされる
-```
-
-コードは戻さず配信だけ即座に戻したいときは、Cloudflare 側のバージョンをロールバックする。
-
-```bash
-pnpm exec wrangler rollback              # 直前のバージョンへ
-pnpm exec wrangler versions list         # 戻し先を選びたいとき
+git push origin main
 ```
 
 ### 必要なシークレット
@@ -131,19 +125,10 @@ pnpm exec wrangler versions list         # 戻し先を選びたいとき
 | 名前 | 用途 | 取り方 |
 |---|---|---|
 | `CLAUDE_CODE_OAUTH_TOKEN` | Actions 内の Claude の認証（サブスク） | `claude setup-token` |
-| `CLOUDFLARE_API_TOKEN` | 自動デプロイ | ダッシュボード → API トークン → Custom の「Edit Cloudflare Workers」テンプレート |
-| `CLOUDFLARE_ACCOUNT_ID` | 自動デプロイ | Cloudflare ダッシュボードの Workers 画面に表示される Account ID |
 
 ```bash
 gh secret set CLAUDE_CODE_OAUTH_TOKEN
-gh secret set CLOUDFLARE_API_TOKEN
-gh secret set CLOUDFLARE_ACCOUNT_ID
 ```
 
 Claude のワークフローには [Claude GitHub App](https://github.com/apps/claude) のインストールも必要。
 シークレットが無いあいだ、該当ジョブはスキップされるだけで CI は落ちない。
-
-### 注意
-
-- Dependabot が起点の実行には Actions のシークレットが渡らない（Dependabot 用の別ストアになる）ため、Dependabot の PR に Claude のレビューは走らない。直したいときは PR に `@claude CIを直して` とコメントする。
-- public リポジトリでは、60日間リポジトリに動きがないと GitHub が cron を自動停止する。止まったら Actions の画面から再有効化する。
