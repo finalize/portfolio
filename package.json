@@ -21,10 +21,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
-    "@astrojs/cloudflare": "^14.4.2",
+    "@astrojs/cloudflare": "^14.4.3",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
-    "astro": "^7.4.2",
+    "astro": "^7.4.4",
     "three": "^0.186.1"
   },
   "devDependencies": {
@@ -34,6 +34,6 @@
     "sharp": "^0.35.5",
     "termpic": "^0.2.2",
     "typescript": "^6.0.3",
-    "wrangler": "^4.153.0"
+    "wrangler": "^4.156.0"
   }
 }
